@@ -231,10 +231,48 @@ All colors MUST be HSL.
     transform: scale(1.05) rotate(var(--filter-rot, 0deg));
   }
 
-  /* Project cards: rotation on hover */
-  .project-card:hover {
-    transform: scale(1.03) rotate(var(--card-rot, 0deg));
+  /* Project cards: ultra smooth hover lift without rotation glitch */
+  .project-card {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
   }
+  .project-card:hover {
+    transform: translateY(-4px) scale(1.01);
+  }
+}
+
+/* ── Liquid / Slime Navigation Physics ── */
+@keyframes slime-squish {
+  0% {
+    transform: scale(1, 1);
+  }
+  25% {
+    transform: scale(1.18, 0.72);
+  }
+  50% {
+    transform: scale(0.88, 1.18);
+  }
+  75% {
+    transform: scale(1.06, 0.94);
+  }
+  90% {
+    transform: scale(0.98, 1.02);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
+.animate-slime-squish {
+  animation: slime-squish 0.52s cubic-bezier(0.22, 1.25, 0.36, 1) both;
+}
+
+.slime-pill-indicator {
+  transition: left 0.42s cubic-bezier(0.34, 1.56, 0.64, 1),
+              width 0.42s cubic-bezier(0.34, 1.56, 0.64, 1),
+              height 0.42s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.2s ease-out;
 }
 
 /* ── Portfolio Vector Decoration ── */
@@ -317,3 +355,241 @@ All colors MUST be HSL.
     max-width: 90vw;
   }
 }
+
+/* ── Redesign: Timeline ── */
+.timeline-line {
+  position: absolute;
+  left: 18px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: hsl(var(--primary));
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 50px;
+  padding-bottom: 2.5rem;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: 10px;
+  top: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  border: 3px solid hsl(var(--background));
+  z-index: 2;
+}
+
+.timeline-year {
+  display: inline-block;
+  padding: 0.25rem 1.25rem;
+  background: hsl(80 85% 55%);
+  color: hsl(0 0% 10%);
+  font-family: 'Boldonse', cursive;
+  font-size: 1.25rem;
+  border-radius: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+/* ── Redesign: FAQ Green Background ── */
+.faq-green-section {
+  background: linear-gradient(180deg, hsl(152 65% 18%) 0%, hsl(155 70% 12%) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.faq-green-section::before,
+.faq-green-section::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 200px;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-size: contain;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Redesign: FAQ Question Items ── */
+.faq-question-item {
+  background: hsl(0 0% 15% / 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid hsl(0 0% 25% / 0.4);
+  border-radius: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.faq-question-item:hover {
+  background: hsl(0 0% 20% / 0.6);
+  border-color: hsl(var(--primary) / 0.5);
+}
+
+/* ── Redesign: Stripes decoration ── */
+.stripes-left {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: clamp(100px, 15vw, 220px);
+  height: auto;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.stripes-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: clamp(100px, 15vw, 220px);
+  height: auto;
+  pointer-events: none;
+  z-index: 1;
+  transform: scaleX(-1);
+}
+
+/* ── Redesign: Service cards ── */
+.service-card-img {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 1rem;
+}
+
+.service-card-img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 30px -10px hsl(var(--primary) / 0.35);
+}
+
+/* ── Redesign: Dots decoration ── */
+.dots-decoration {
+  position: absolute;
+  width: 80px;
+  height: auto;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .dots-decoration {
+    width: 50px;
+  }
+  .stripes-left,
+  .stripes-right {
+    width: clamp(60px, 12vw, 120px);
+  }
+}
+
+/* ── Hero Section Load Animations (Surgimento limpo, fluido e 100% livre de glitches) ── */
+@keyframes heroTitleReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroBoxReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes heroBtnReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes heroSocialsReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroPhotoReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes heroRibbonExpand {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.4) scaleY(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleX(1) scaleY(1);
+  }
+}
+
+@keyframes heroRibbonTextReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-hero-title {
+  animation: heroTitleReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both;
+}
+
+.animate-hero-box {
+  animation: heroBoxReveal 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+.animate-hero-btn {
+  animation: heroBtnReveal 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
+}
+
+.animate-hero-socials {
+  animation: heroSocialsReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
+}
+
+.animate-hero-photo {
+  animation: heroPhotoReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+.animate-hero-ribbon {
+  transform-origin: center;
+  animation: heroRibbonExpand 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+.animate-hero-ribbon-text {
+  animation: heroRibbonTextReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
+}
+
+

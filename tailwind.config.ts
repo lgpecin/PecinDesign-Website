@@ -14,7 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+        boldonse: ['Boldonse', 'Syne', 'Anton', 'Impact', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

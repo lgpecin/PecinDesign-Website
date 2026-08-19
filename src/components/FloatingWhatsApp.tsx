@@ -60,7 +60,7 @@ const FloatingWhatsApp = () => {
         <img 
           src={whatsappLogo} 
           alt="WhatsApp" 
-          className="relative w-20 h-20 object-contain drop-shadow-2xl" 
+          className="relative w-14 h-14 object-contain drop-shadow-2xl" 
           loading="lazy"
           decoding="async"
         />

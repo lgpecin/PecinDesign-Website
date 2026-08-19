@@ -1,50 +1,73 @@
-import { Button } from "./ui/button";
 import { MessageSquare } from "lucide-react";
 import whatsappLogo from "@/assets/whatsapp-logo.png";
-import { useInView } from "@/hooks/use-in-view";
+import stripesDecoration from "@/assets/redesign/stripes-decoration.png";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { AnimatedSection } from "@/components/AnimatedSection";
 
 const Contact = () => {
-  const { ref } = useInView({ threshold: 0.1, triggerOnce: true });
   const { settings } = useSiteSettings();
-  const { t } = useLanguage();
+  const whatsappLink = `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(settings.whatsapp_message)}`;
 
   return (
-    <section id="contact" className="py-12 sm:py-16 relative overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] animate-pulse"></div>
-        <div className="absolute top-1/4 right-1/4 w-[300px] h-[300px] bg-primary/5 rounded-full blur-[100px] animate-float" style={{ animationDelay: '1s', animationDuration: '8s' }}></div>
-        <div className="absolute bottom-1/4 left-1/4 w-[400px] h-[400px] bg-primary/8 rounded-full blur-[110px] animate-float" style={{ animationDelay: '2s', animationDuration: '10s' }}></div>
-      </div>
+    <section id="contact" className="relative py-16 sm:py-24 overflow-hidden">
+      {/* Stripes decoration - left */}
+      <img
+        src={stripesDecoration}
+        alt=""
+        className="stripes-left"
+        aria-hidden="true"
+        loading="lazy"
+      />
+      {/* Stripes decoration - right */}
+      <img
+        src={stripesDecoration}
+        alt=""
+        className="stripes-right"
+        aria-hidden="true"
+        loading="lazy"
+      />
 
       <div className="container mx-auto px-6 relative z-10">
-        <div className="max-w-2xl mx-auto">
-          <div ref={ref} className="text-center mb-10">
-            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <MessageSquare className="w-8 h-8 text-primary" />
+        <AnimatedSection>
+          <div className="max-w-2xl mx-auto text-center">
+            {/* Icon */}
+            <div className="flex justify-center mb-6">
+              <div className="w-14 h-14 bg-primary/15 rounded-2xl flex items-center justify-center">
+                <MessageSquare className="w-7 h-7 text-primary" />
+              </div>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="inline-block transition-transform duration-200 ease-out hover:scale-105">
-                {t("contact.title")}
-              </span>
-            </h2>
-            <p className="text-lg text-muted-foreground">{t("contact.subtitle")}</p>
-          </div>
 
-          <div className="flex items-center justify-center">
-            <Button
-              size="lg"
-              onClick={() => window.open(`https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(settings.whatsapp_message)}`, '_blank')}
-              className="h-20 md:h-24 text-xl md:text-2xl px-10 md:px-14 rounded-2xl shadow-xl transition-transform duration-200 ease-out hover:scale-[1.03] active:scale-[0.98]"
+            {/* Title */}
+            <h2 className="font-boldonse text-3xl sm:text-4xl md:text-5xl text-white mb-4">
+              Vamos Conversar?
+            </h2>
+
+            {/* Subtitle */}
+            <p className="text-muted-foreground text-base sm:text-lg mb-8">
+              Tem um projeto em mente? Fale comigo por WhatsApp.
+            </p>
+
+            {/* WhatsApp CTA */}
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 px-10 py-5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full text-lg sm:text-xl font-bold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
             >
-              <img src={whatsappLogo} alt="WhatsApp" className="mr-4 w-12 h-12 md:w-14 md:h-14 object-contain" width="56" height="56" loading="lazy" decoding="async" />
-              {t("contact.cta_whatsapp")}
-            </Button>
+              <img
+                src={whatsappLogo}
+                alt="WhatsApp"
+                className="w-8 h-8 object-contain"
+                width="32"
+                height="32"
+              />
+              Fale comigo no WhatsApp
+            </a>
           </div>
-        </div>
+        </AnimatedSection>
       </div>
     </section>
   );
 };
+
 export default Contact;
