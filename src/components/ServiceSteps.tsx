@@ -1,5 +1,6 @@
 import { Users, FileText, FileSignature, Presentation, CheckCircle, Package, AlertCircle } from "lucide-react";
 import { AnimatedSection } from "@/components/AnimatedSection";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Step {
   icon: React.ReactNode;
@@ -8,46 +9,48 @@ interface Step {
   duration: string;
 }
 
-const steps: Step[] = [
-  {
-    icon: <Users className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#00ff88]" />,
-    title: "Reunião",
-    duration: "30-60 min",
-    desc: "Conversamos sobre suas necessidades, objetivos e visão para o projeto. É o momento de alinhar expectativas e entender o que você precisa.",
-  },
-  {
-    icon: <FileText className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#00ff88]" />,
-    title: "Briefing",
-    duration: "1-2 dias",
-    desc: "Recebo todas as informações detalhadas do projeto: público-alvo, referências visuais, materiais existentes e requisitos específicos.",
-  },
-  {
-    icon: <FileSignature className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#00ff88]" />,
-    title: "Contrato",
-    duration: "1 dia",
-    desc: "Formalizamos nossa parceria com um contrato claro, definindo prazos, valores, entregas e termos de trabalho.",
-  },
-  {
-    icon: <Presentation className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#00ff88]" />,
-    title: "Apresentação",
-    duration: "5-7 dias",
-    desc: "Apresento as primeiras propostas criativas. Você terá a oportunidade de avaliar as direções visuais e dar seu feedback.",
-  },
-  {
-    icon: <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#00ff88]" />,
-    title: "Validação",
-    duration: "1-3 dias",
-    desc: "Refinamos o projeto com base no seu feedback. Fazemos os ajustes necessários até que tudo esteja perfeito.",
-  },
-  {
-    icon: <Package className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#00ff88]" />,
-    title: "Entrega Final",
-    duration: "1-2 dias",
-    desc: "Você recebe todos os arquivos finais nos formatos adequados, prontos para uso. Inclui manual de aplicação quando necessário.",
-  },
-];
-
 const ServiceSteps = () => {
+  const { t } = useLanguage();
+
+  const steps: Step[] = [
+    {
+      icon: <Users className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#00ff88]" />,
+      title: t("steps.step1_title"),
+      duration: t("steps.step1_duration"),
+      desc: t("steps.step1_desc"),
+    },
+    {
+      icon: <FileText className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#00ff88]" />,
+      title: t("steps.step2_title"),
+      duration: t("steps.step2_duration"),
+      desc: t("steps.step2_desc"),
+    },
+    {
+      icon: <FileSignature className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#00ff88]" />,
+      title: t("steps.step3_title"),
+      duration: t("steps.step3_duration"),
+      desc: t("steps.step3_desc"),
+    },
+    {
+      icon: <Presentation className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#00ff88]" />,
+      title: t("steps.step4_title"),
+      duration: t("steps.step4_duration"),
+      desc: t("steps.step4_desc"),
+    },
+    {
+      icon: <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#00ff88]" />,
+      title: t("steps.step5_title"),
+      duration: t("steps.step5_duration"),
+      desc: t("steps.step5_desc"),
+    },
+    {
+      icon: <Package className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#00ff88]" />,
+      title: t("steps.step6_title"),
+      duration: t("steps.step6_duration"),
+      desc: t("steps.step6_desc"),
+    },
+  ];
+
   return (
     <section className="relative py-16 sm:py-24 md:py-28 overflow-hidden bg-[#0a0a0a]">
       {/* Subtle Grid lines */}
@@ -60,12 +63,12 @@ const ServiceSteps = () => {
         <AnimatedSection>
           <div className="text-center mb-3 sm:mb-4">
             <h2 className="font-boldonse text-2xl sm:text-4xl md:text-5xl text-white tracking-wide leading-[1.2] sm:leading-[1.25]">
-              Como é trabalhar comigo?
+              {t("steps.title")}
             </h2>
           </div>
 
           <p className="text-center text-xs sm:text-sm text-neutral-400 max-w-2xl mx-auto mb-8 sm:mb-12 leading-relaxed px-2">
-            É suuuper importante que todas etapas sejam bem claras. Então, quando você entra em contato comigo para desenvolvermos um projeto, é isso que acontece:
+            {t("steps.subtitle")}
           </p>
         </AnimatedSection>
 
@@ -99,7 +102,8 @@ const ServiceSteps = () => {
             <div className="bg-[#00ff88]/5 border border-[#00ff88]/20 rounded-xl p-3.5 sm:p-5 flex items-start gap-2.5 sm:gap-3 text-xs sm:text-sm text-neutral-300">
               <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-[#00ff88] flex-shrink-0 mt-0.5" />
               <p className="leading-relaxed text-[11px] sm:text-xs md:text-sm">
-                <strong className="text-white font-semibold">Observação:</strong> O cronograma de trabalho e entrega pode variar e é definido com precisão conforme a definição do escopo do projeto durante a fase de briefing e contrato.
+                <strong className="text-white font-semibold">{t("steps.disclaimer_label")} </strong>
+                {t("steps.disclaimer")}
               </p>
             </div>
           </div>

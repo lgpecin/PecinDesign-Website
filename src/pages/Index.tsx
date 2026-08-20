@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import whatsappLogo from "@/assets/whatsapp-logo.png";
@@ -25,12 +25,10 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import vectorFlower from "@/assets/redesign/Vector.svg";
 import vectorAsterisk from "@/assets/redesign/Vector-1.svg";
 
-// Lazy loading
-const About = lazy(() => import("@/components/About"));
-const InfiniteCarousel = lazy(() => import("@/components/InfiniteCarousel"));
-const ServiceSteps = lazy(() => import("@/components/ServiceSteps"));
-const FAQ = lazy(() => import("@/components/FAQ"));
-const Contact = lazy(() => import("@/components/Contact"));
+import About from "@/components/About";
+import ServiceSteps from "@/components/ServiceSteps";
+import FAQ from "@/components/FAQ";
+import Contact from "@/components/Contact";
 
 interface ProjectMedia {
   url: string;
@@ -124,7 +122,7 @@ const Index = () => {
           description: project.description,
           fullDescription: project.full_description,
           technologies: project.project_technologies?.map((t: any) => t.technology) || [],
-          year: project.year.toString(),
+          year: (project.year ?? "").toString(),
           imageSpacing: project.image_spacing ?? 16,
           hideBanner: project.hide_banner ?? false,
           notes: project.notes ?? undefined
@@ -249,7 +247,7 @@ const Index = () => {
               {/* White Pill Category Filters */}
               <div className="inline-flex flex-wrap justify-center items-center bg-white rounded-full p-1.5 shadow-xl max-w-xl mx-auto border border-white/20 mb-8 sm:mb-12">
                 {categories.map((category) => {
-                  const label = category === "__all__" ? "Todos" : category;
+                  const label = category === "__all__" ? t("projects.filter_all") : category;
                   const isSelected = selectedCategory === category;
                   return (
                     <button
@@ -295,7 +293,7 @@ const Index = () => {
                     to="/portfolio"
                     className="inline-flex items-center gap-3 px-8 sm:px-10 py-3.5 sm:py-4 rounded-full font-boldonse text-sm sm:text-lg md:text-xl bg-[#ccff00] hover:bg-[#b8e600] text-black shadow-[0_10px_30px_rgba(204,255,0,0.35)] hover:shadow-[0_15px_40px_rgba(204,255,0,0.55)] transition-all duration-300 hover:scale-105 active:scale-95"
                   >
-                    <span>Conheça meu portfólio completo</span>
+                    <span>{t("projects.view_full")}</span>
                     <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
                   </Link>
                 </div>
@@ -304,12 +302,10 @@ const Index = () => {
           </div>
         </section>
 
-        <Suspense fallback={<div className="py-16" />}>
-          <About />
-          <ServiceSteps />
-          <FAQ />
-          <Contact />
-        </Suspense>
+        <About />
+        <ServiceSteps />
+        <FAQ />
+        <Contact />
       </main>
 
       <FloatingWhatsApp />

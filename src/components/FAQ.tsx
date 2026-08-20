@@ -7,27 +7,27 @@ const FAQ = () => {
 
   const faqs = [
     {
-      question: "Quais serviços de design podemos desenvolver?",
+      question: t("faq.q1"),
       answerKey: "faq.a1_intro",
     },
     {
-      question: "Qual é o prazo médio de entrega dos projetos?",
+      question: t("faq.q2"),
       answerKey: "faq.a2",
     },
     {
-      question: "O projeto desenvolvido conta com rodadas de revisões?",
+      question: t("faq.q3"),
       answerKey: "faq.a3",
     },
     {
-      question: "Quais formatos de arquivo são entregues ao final do projeto?",
+      question: t("faq.q4"),
       answerKey: "faq.a4",
     },
     {
-      question: "Você trabalha com clientes remotos?",
+      question: t("faq.q5"),
       answerKey: "faq.a5",
     },
     {
-      question: "Podemos marcar uma reunião para conversar sobre meu projeto?",
+      question: t("faq.q6"),
       answerKey: "faq.a6",
     },
   ];
@@ -46,7 +46,7 @@ const FAQ = () => {
         <AnimatedSection>
           {/* Title */}
           <h2 className="font-boldonse text-4xl sm:text-6xl md:text-7xl text-center text-[#ccff00] mb-10 sm:mb-14 tracking-wider leading-[1.38] sm:leading-[1.42] md:leading-[1.45] [text-shadow:0_0_30px_rgba(204,255,0,0.3)]">
-            FICOU COM<br />ALGUMA DÚVIDA?
+            {t("faq.title_line1")}<br />{t("faq.title_line2")}
           </h2>
         </AnimatedSection>
 
@@ -75,7 +75,7 @@ const FAQ = () => {
         {/* Footer text */}
         <AnimatedSection index={2}>
           <p className="text-center text-white/80 text-xs sm:text-sm md:text-base mt-8 sm:mt-10 max-w-lg mx-auto leading-relaxed">
-            Tem alguma outra dúvida? Fique a vontade pra me dar um alô, a gente conversa e desenrola sua ideia!
+            {t("faq.footer")}
           </p>
         </AnimatedSection>
       </div>

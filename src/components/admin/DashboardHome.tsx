@@ -26,15 +26,6 @@ const DashboardHome = ({ onNavigate }: DashboardHomeProps) => {
       borderColor: 'border-green-500/50'
     },
     { 
-      id: 'statistics', 
-      label: 'Estatísticas', 
-      icon: BarChart3, 
-      description: 'Métricas do site',
-      color: 'from-orange-500/20 to-red-500/20',
-      iconColor: 'text-orange-500',
-      borderColor: 'border-orange-500/50'
-    },
-    { 
       id: 'settings', 
       label: 'Configurações', 
       icon: Settings, 
@@ -53,7 +44,7 @@ const DashboardHome = ({ onNavigate }: DashboardHomeProps) => {
       </div>
 
       {/* Main Sections */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {mainSections.map((section) => {
           const Icon = section.icon;
           return (

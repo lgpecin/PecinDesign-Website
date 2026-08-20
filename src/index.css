@@ -1,5 +1,14 @@
 @import 'react-image-crop/dist/ReactCrop.css';
 
+/* ── Custom Font: Boldonse ── */
+@font-face {
+  font-family: 'Boldonse';
+  src: url('/fonts/Boldonse-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -282,196 +291,6 @@ All colors MUST be HSL.
               opacity 0.2s ease-out;
 }
 
-/* ── Portfolio Vector Decoration ── */
-.portfolio-vector-wrapper {
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-  overflow: visible;
-  pointer-events: none;
-}
-
-.portfolio-vector-svg {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.portfolio-anchor {
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-.portfolio-handle {
-  opacity: 0;
-  animation: handleFadeIn 0.8s ease-out forwards;
-  animation-delay: 1.6s;
-}
-
-.portfolio-selection-box-wrapper {
-  position: relative;
-  display: inline-block;
-}
-
-.portfolio-dashed-border {
-  position: absolute;
-  inset: 0;
-  border: 1.5px dashed hsl(var(--primary));
-  border-radius: 3px;
-  opacity: 0.7;
-  animation: selectionPulse 2.5s ease-in-out infinite;
-  pointer-events: none;
-}
-
-.portfolio-handle-square {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background: hsl(var(--primary));
-  border: 1.5px solid hsl(var(--foreground));
-  border-radius: 1px;
-  z-index: 20;
-  pointer-events: none;
-}
-
-.portfolio-handle-square.small {
-  width: 6px;
-  height: 6px;
-}
-
-@keyframes handleFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes selectionPulse {
-  0%, 100% {
-    opacity: 0.5;
-  }
-  50% {
-    opacity: 0.9;
-  }
-}
-
-/* Responsive adjustments */
-@media (max-width: 640px) {
-  .portfolio-vector-wrapper {
-    max-width: 90vw;
-  }
-}
-
-/* ── Redesign: Timeline ── */
-.timeline-line {
-  position: absolute;
-  left: 18px;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: hsl(var(--primary));
-}
-
-.timeline-item {
-  position: relative;
-  padding-left: 50px;
-  padding-bottom: 2.5rem;
-}
-
-.timeline-dot {
-  position: absolute;
-  left: 10px;
-  top: 4px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: hsl(var(--primary));
-  border: 3px solid hsl(var(--background));
-  z-index: 2;
-}
-
-.timeline-year {
-  display: inline-block;
-  padding: 0.25rem 1.25rem;
-  background: hsl(80 85% 55%);
-  color: hsl(0 0% 10%);
-  font-family: 'Boldonse', cursive;
-  font-size: 1.25rem;
-  border-radius: 0.5rem;
-  margin-bottom: 0.75rem;
-}
-
-/* ── Redesign: FAQ Green Background ── */
-.faq-green-section {
-  background: linear-gradient(180deg, hsl(152 65% 18%) 0%, hsl(155 70% 12%) 100%);
-  position: relative;
-  overflow: hidden;
-}
-
-.faq-green-section::before,
-.faq-green-section::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  width: 200px;
-  height: 100%;
-  background-repeat: no-repeat;
-  background-size: contain;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ── Redesign: FAQ Question Items ── */
-.faq-question-item {
-  background: hsl(0 0% 15% / 0.6);
-  backdrop-filter: blur(8px);
-  border: 1px solid hsl(0 0% 25% / 0.4);
-  border-radius: 0.5rem;
-  padding: 0.875rem 1.5rem;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.faq-question-item:hover {
-  background: hsl(0 0% 20% / 0.6);
-  border-color: hsl(var(--primary) / 0.5);
-}
-
-/* ── Redesign: Stripes decoration ── */
-.stripes-left {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: clamp(100px, 15vw, 220px);
-  height: auto;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.stripes-right {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: clamp(100px, 15vw, 220px);
-  height: auto;
-  pointer-events: none;
-  z-index: 1;
-  transform: scaleX(-1);
-}
-
-/* ── Redesign: Service cards ── */
-.service-card-img {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border-radius: 1rem;
-}
-
-.service-card-img:hover {
-  transform: scale(1.05);
-  box-shadow: 0 10px 30px -10px hsl(var(--primary) / 0.35);
-}
-
 /* ── Redesign: Dots decoration ── */
 .dots-decoration {
   position: absolute;
@@ -485,10 +304,6 @@ All colors MUST be HSL.
 @media (max-width: 768px) {
   .dots-decoration {
     width: 50px;
-  }
-  .stripes-left,
-  .stripes-right {
-    width: clamp(60px, 12vw, 120px);
   }
 }
 

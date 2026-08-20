@@ -65,7 +65,7 @@ const Navigation = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const isPortfolioPage = location.pathname === "/portfolio";
@@ -186,7 +186,12 @@ const Navigation = () => {
           </div>
 
           {/* Navigation Buttons */}
-          {NAV_ITEMS.map((item) => {
+          {[
+            { id: "hero", label: t("nav.home") },
+            { id: "services", label: t("nav.services") },
+            { id: "portfolio", label: t("nav.projects") },
+            { id: "about", label: t("nav.about") },
+          ].map((item) => {
             const isSelected = currentTargetId === item.id;
             return (
               <button
@@ -204,10 +209,10 @@ const Navigation = () => {
           })}
         </div>
 
-        {/* Right: Language Switcher (PT / EN) — fades out on scroll */}
+        {/* Right: Language Switcher (PT / EN) — fades out on mobile scroll */}
         <div
           className={`flex items-center gap-1 bg-[#141517]/80 backdrop-blur-md border border-white/20 rounded-full p-1 shadow-md transition-all duration-500 ${
-            isScrolled ? "opacity-0 pointer-events-none scale-90" : "opacity-100 pointer-events-auto scale-100"
+            isScrolled ? "max-md:opacity-0 max-md:pointer-events-none max-md:scale-90" : "opacity-100 pointer-events-auto scale-100"
           }`}
         >
           <button

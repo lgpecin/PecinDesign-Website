@@ -2,6 +2,7 @@ import { useState } from "react";
 import { X, Sparkles, Globe, Box, Eye, Share2, PlusCircle, CheckCircle2 } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useInView } from "@/hooks/use-in-view";
+import { useLanguage } from "@/contexts/LanguageContext";
 import whatsappLogo from "@/assets/whatsapp-logo.png";
 
 // Service sticker assets
@@ -32,132 +33,159 @@ interface ServiceItem {
   Icon: React.ElementType;
 }
 
-const servicesData: ServiceItem[] = [
-  {
-    id: "branding",
-    title: "Branding",
-    subtitle: "Construção de Marcas Poderosas",
-    src: serviceBranding,
-    bgColor: "#C6F806", // Lime green
-    textColor: "#064e3b", // Dark green
-    btnBg: "#18181b",
-    btnText: "#ffffff",
-    description:
-      "Construção completa de marcas autênticas e memoráveis: desde o diagnóstico estratégico, DNA da marca e tom de voz, até a identidade visual completa, paleta cromática, tipografia e manual com todas as regras de aplicação.",
-    deliverables: [
-      "Diagnóstico e Estratégia de Posicionamento",
-      "Logotipo, Símbolos e Identidade Visual",
-      "Manual de Identidade Visual Completo",
-      "Aplicações Digitais e Materiais Institucionais",
-    ],
-    Icon: Sparkles,
-  },
-  {
-    id: "webdesign",
-    title: "Web Design",
-    subtitle: "Sites, apps, landing pages",
-    src: serviceWebdesign,
-    bgColor: "#00C090", // Emerald Teal
-    textColor: "#043828",
-    btnBg: "#18181b",
-    btnText: "#ffffff",
-    description:
-      "Criação de websites institucionais modernos, landing pages de altíssima conversão, portfólios e interfaces de aplicativos (UI/UX). Foco em usabilidade, velocidade de carregamento, responsividade e estética de alto nível.",
-    deliverables: [
-      "Landing Pages de Alta Conversão",
-      "Websites Institucionais e Portfólios",
-      "Design de Interfaces (UI/UX para Apps e Web)",
-      "Prototipagem Interativa e Responsividade Total",
-    ],
-    Icon: Globe,
-  },
-  {
-    id: "productdesign",
-    title: "Product Design",
-    subtitle: "Produtos e soluções",
-    src: serviceProductdesign,
-    bgColor: "#0C3643", // Deep Slate
-    textColor: "#ffffff",
-    btnBg: "#C6F806",
-    btnText: "#0C3643",
-    description:
-      "Design de produtos físicos e digitais com foco na experiência do usuário, viabilidade e apelo comercial. Desenvolvimento de embalagens, rótulos, design system e interfaces completas centradas nas necessidades do público.",
-    deliverables: [
-      "Design de Embalagens, Rótulos e Mockups 3D",
-      "Arquitetura de Informação e Design System",
-      "Pesquisa de Usuário e Testes de Usabilidade",
-      "Prototipagem de Produtos Físicos e Digitais",
-    ],
-    Icon: Box,
-  },
-  {
-    id: "direcaodearte",
-    title: "Direção de Arte",
-    subtitle: "Desenvolvimento de campanhas e peças",
-    src: serviceDirecaodearte,
-    bgColor: "#00A82D", // Vibrant Green
-    textColor: "#ffffff",
-    btnBg: "#18181b",
-    btnText: "#ffffff",
-    description:
-      "Conceituação criativa para campanhas publicitárias, lançamentos, editoriais e projetos visuais de grande escala. Direção estética de ensaios fotográficos, key visuals e peças de alto impacto que contam histórias fortes.",
-    deliverables: [
-      "Conceituação Criativa de Campanhas",
-      "Key Visuals e Materiais de Lançamento",
-      "Direção Visual para Ensaios e Conteúdos",
-      "Curadoria Estética e Padronização Visual",
-    ],
-    Icon: Eye,
-  },
-  {
-    id: "socialmedia",
-    title: "Social Media",
-    subtitle: "Conteúdos para as Mídias Sociais",
-    src: serviceSocialmedia,
-    bgColor: "#00C4E2", // Cyan Blue
-    textColor: "#063d4a",
-    btnBg: "#18181b",
-    btnText: "#ffffff",
-    description:
-      "Design estratégico e produção de conteúdos para redes sociais: posts estáticos com autoridade visual, carrosséis de alto engajamento, capas de reels, stories dinâmicos e identidades completas para perfis profissionais.",
-    deliverables: [
-      "Identidade Visual para Feeds e Perfis",
-      "Carrosséis Estratégicos e Posts Estáticos",
-      "Templates Editáveis e Diretrizes de Conteúdo",
-      "Banners, Thumbnails e Criativos para Anúncios",
-    ],
-    Icon: Share2,
-  },
-  {
-    id: "emuitomais",
-    title: "E muito mais...",
-    subtitle: "Qual é sua necessidade?",
-    src: serviceEmuitomais,
-    bgColor: "#3D3D3D", // Dark Charcoal
-    textColor: "#ffffff",
-    btnBg: "#C6F806",
-    btnText: "#18181b",
-    description:
-      "Projetos personalizados sob medida para o seu desafio: apresentações corporativas de impacto (pitch decks), e-books diagramados, ativações de marca, materiais gráficos impressos e consultoria criativa exclusiva.",
-    deliverables: [
-      "Apresentações Corporativas e Pitch Decks",
-      "Diagramação de E-books e Materiais Ricos",
-      "Ativações de Marca e Materiais Impressos",
-      "Consultoria Criativa e Projetos Especiais",
-    ],
-    Icon: PlusCircle,
-  },
-];
-
 const Services = () => {
   const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
   const { settings } = useSiteSettings();
+  const { t, language } = useLanguage();
   const { ref, isInView } = useInView({ threshold: 0.1, triggerOnce: false });
 
   const getWhatsAppLink = (serviceTitle: string) => {
-    const message = `Olá Leo! Gostaria de conversar sobre o serviço de ${serviceTitle}.`;
+    const message = language === "en" 
+      ? `Hi Leo! I'd like to talk about ${serviceTitle}.`
+      : `Olá Leo! Gostaria de conversar sobre o serviço de ${serviceTitle}.`;
     return `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(message)}`;
   };
+
+  const servicesData: ServiceItem[] = [
+    {
+      id: "branding",
+      title: t("services.branding_title"),
+      subtitle: t("services.branding_sub"),
+      src: serviceBranding,
+      bgColor: "#C6F806",
+      textColor: "#064e3b",
+      btnBg: "#18181b",
+      btnText: "#ffffff",
+      description: t("services.branding_desc"),
+      deliverables: language === "en" ? [
+        "Positioning Diagnosis & Strategy",
+        "Logo, Brand Symbols & Identity System",
+        "Complete Brand Guidelines Manual",
+        "Digital Applications & Brand Collateral",
+      ] : [
+        "Diagnóstico e Estratégia de Posicionamento",
+        "Logotipo, Símbolos e Identidade Visual",
+        "Manual de Identidade Visual Completo",
+        "Aplicações Digitais e Materiais Institucionais",
+      ],
+      Icon: Sparkles,
+    },
+    {
+      id: "webdesign",
+      title: t("services.webdesign_title"),
+      subtitle: t("services.webdesign_sub"),
+      src: serviceWebdesign,
+      bgColor: "#00C090",
+      textColor: "#043828",
+      btnBg: "#18181b",
+      btnText: "#ffffff",
+      description: t("services.webdesign_desc"),
+      deliverables: language === "en" ? [
+        "High-Converting Landing Pages",
+        "Corporate Websites & Portfolios",
+        "UI/UX Design for Web and Mobile Apps",
+        "Interactive Prototyping & Full Responsiveness",
+      ] : [
+        "Landing Pages de Alta Conversão",
+        "Websites Institucionais e Portfólios",
+        "Design de Interfaces (UI/UX para Apps e Web)",
+        "Prototipagem Interativa e Responsividade Total",
+      ],
+      Icon: Globe,
+    },
+    {
+      id: "productdesign",
+      title: t("services.productdesign_title"),
+      subtitle: t("services.productdesign_sub"),
+      src: serviceProductdesign,
+      bgColor: "#0C3643",
+      textColor: "#ffffff",
+      btnBg: "#C6F806",
+      btnText: "#0C3643",
+      description: t("services.productdesign_desc"),
+      deliverables: language === "en" ? [
+        "Packaging Design, Labels & 3D Mockups",
+        "Information Architecture & Design System",
+        "User Research & Usability Testing",
+        "Physical & Digital Product Prototyping",
+      ] : [
+        "Design de Embalagens, Rótulos e Mockups 3D",
+        "Arquitetura de Informação e Design System",
+        "Pesquisa de Usuário e Testes de Usabilidade",
+        "Prototipagem de Produtos Físicos e Digitais",
+      ],
+      Icon: Box,
+    },
+    {
+      id: "direcaodearte",
+      title: t("services.artdirection_title"),
+      subtitle: t("services.artdirection_sub"),
+      src: serviceDirecaodearte,
+      bgColor: "#00A82D",
+      textColor: "#ffffff",
+      btnBg: "#18181b",
+      btnText: "#ffffff",
+      description: t("services.artdirection_desc"),
+      deliverables: language === "en" ? [
+        "Creative Campaign Conceptualization",
+        "Key Visuals & Launch Collateral",
+        "Visual Direction for Photoshoots & Content",
+        "Aesthetic Curation & Visual Standardization",
+      ] : [
+        "Conceituação Criativa de Campanhas",
+        "Key Visuals e Materiais de Lançamento",
+        "Direção Visual para Ensaios e Conteúdos",
+        "Curadoria Estética e Padronização Visual",
+      ],
+      Icon: Eye,
+    },
+    {
+      id: "socialmedia",
+      title: t("services.socialmedia_title"),
+      subtitle: t("services.socialmedia_sub"),
+      src: serviceSocialmedia,
+      bgColor: "#00C4E2",
+      textColor: "#063d4a",
+      btnBg: "#18181b",
+      btnText: "#ffffff",
+      description: t("services.socialmedia_desc"),
+      deliverables: language === "en" ? [
+        "Visual Identity for Feeds & Social Profiles",
+        "Strategic Carousels & Static Posts",
+        "Custom Templates & Content Guidelines",
+        "Banners, Thumbnails & Ad Creatives",
+      ] : [
+        "Identidade Visual para Feeds e Perfis",
+        "Carrosséis Estratégicos e Posts Estáticos",
+        "Templates Editáveis e Diretrizes de Conteúdo",
+        "Banners, Thumbnails e Criativos para Anúncios",
+      ],
+      Icon: Share2,
+    },
+    {
+      id: "emuitomais",
+      title: t("services.more_title"),
+      subtitle: t("services.more_sub"),
+      src: serviceEmuitomais,
+      bgColor: "#3D3D3D",
+      textColor: "#ffffff",
+      btnBg: "#C6F806",
+      btnText: "#18181b",
+      description: t("services.more_desc"),
+      deliverables: language === "en" ? [
+        "Corporate Presentations & Pitch Decks",
+        "E-book Layouts & Rich Materials",
+        "Brand Activations & Print Collateral",
+        "Creative Consulting & Bespoke Projects",
+      ] : [
+        "Apresentações Corporativas e Pitch Decks",
+        "Diagramação de E-books e Materiais Ricos",
+        "Ativações de Marca e Materiais Impressos",
+        "Consultoria Criativa e Projetos Especiais",
+      ],
+      Icon: PlusCircle,
+    },
+  ];
 
   return (
     <section
@@ -204,7 +232,7 @@ const Services = () => {
           }`}
         >
           <h2 className="font-boldonse text-3xl sm:text-5xl md:text-6xl text-[#064e3b] tracking-tight">
-            Meus Serviços
+            {t("services.title")}
           </h2>
         </div>
 
@@ -324,7 +352,7 @@ const Services = () => {
                     alt="WhatsApp"
                     className="w-5 h-5 sm:w-6 sm:h-6 object-contain"
                   />
-                  Fale comigo
+                  {t("hero.cta_whatsapp")}
                 </a>
               </div>
 
