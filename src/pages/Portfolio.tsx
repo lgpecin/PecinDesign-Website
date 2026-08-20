@@ -114,7 +114,7 @@ const Portfolio = () => {
           description: project.description,
           fullDescription: project.full_description,
           technologies: project.project_technologies?.map((t: any) => t.technology) || [],
-          year: project.year.toString(),
+          year: (project.year ?? "").toString(),
           imageSpacing: project.image_spacing ?? 16,
           hideBanner: project.hide_banner ?? false,
           notes: project.notes ?? undefined
@@ -219,18 +219,18 @@ const Portfolio = () => {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white font-medium text-xs sm:text-sm backdrop-blur-md transition-all active:scale-95 border border-white/10"
             >
               <ArrowLeft className="w-4 h-4" />
-              Voltar ao Início
+              {t("nav.back_home")}
             </Link>
           </div>
 
           <div className="text-center mb-10 sm:mb-14">
             <h1 className="font-boldonse text-5xl sm:text-7xl md:text-8xl text-[#ccff00] mb-6 tracking-wider">
-              PORTFÓLIO
+              {t("projects.title").toUpperCase()}
             </h1>
 
             <div className="inline-flex flex-wrap justify-center items-center bg-white rounded-full p-1.5 shadow-xl max-w-2xl mx-auto border border-white/20 mb-8 sm:mb-12">
               {categories.map((category) => {
-                const label = category === "__all__" ? "Todos" : category;
+                const label = category === "__all__" ? t("projects.filter_all") : category;
                 const isSelected = selectedCategory === category;
                 return (
                   <button

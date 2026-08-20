@@ -6,9 +6,11 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { Instagram, Linkedin } from "lucide-react";
 import BehanceIcon from "@/components/icons/BehanceIcon";
 import InfiniteCarousel from "@/components/InfiniteCarousel";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Hero = () => {
   const { settings } = useSiteSettings();
+  const { t } = useLanguage();
   const whatsappLink = `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(settings.whatsapp_message)}`;
 
   /* ════════════════════════════════════════════════════════════════════════════════
@@ -136,7 +138,7 @@ const Hero = () => {
                     marginBottom: mobileHero.tituloMargemInferior,
                   }}
                 >
-                  Opa, tudo bom?
+                  {t("hero.greeting")}
                 </h1>
 
                 {/* Dashed selection box — sangra levemente sob a foto */}
@@ -173,9 +175,9 @@ const Hero = () => {
                       }}
                     />
                   ))}
-                  <p className="text-white font-medium leading-[1.4]" style={{ fontSize: "12px" }}>Se você precisa de</p>
-                  <p className="font-bold text-[#00ff88] leading-[1.3]" style={{ fontSize: "14px" }}>design, autoridade</p>
-                  <p className="font-bold text-[#00ff88] leading-[1.3]" style={{ fontSize: "14px" }}>e posicionamento...</p>
+                  <p className="text-white font-medium leading-[1.4]" style={{ fontSize: "12px" }}>{t("hero.box_line1")}</p>
+                  <p className="font-bold text-[#00ff88] leading-[1.3]" style={{ fontSize: "14px" }}>{t("hero.box_line2")}</p>
+                  <p className="font-bold text-[#00ff88] leading-[1.3]" style={{ fontSize: "14px" }}>{t("hero.box_line3")}</p>
                 </div>
 
                 {/* WhatsApp button — full width of left column */}
@@ -187,7 +189,7 @@ const Hero = () => {
                   style={{ padding: mobileHero.botaoPadding, fontSize: mobileHero.botaoFonteTamanho }}
                 >
                   <img src={whatsappLogo} alt="WhatsApp" className="object-contain shrink-0" style={{ width: mobileHero.botaoIconeTamanho, height: mobileHero.botaoIconeTamanho }} />
-                  Fale comigo!
+                  {t("hero.cta_whatsapp")}
                 </a>
 
                 {/* Spacer to allow photo to show below button */}
@@ -204,7 +206,7 @@ const Hero = () => {
                 loading="eager"
               />
               <span className="absolute inset-0 flex items-center justify-center font-boldonse text-white tracking-tight lowercase select-none animate-hero-ribbon-text drop-shadow-md" style={{ fontSize: mobileHero.faixaTextoTamanho }}>
-                designer & diretor de arte
+                {t("hero.ribbon")}
               </span>
             </div>
 
@@ -265,7 +267,7 @@ const Hero = () => {
                   marginLeft: "-5px",
                 }}
               >
-                Opa, tudo bom?
+                {t("hero.greeting")}
               </h1>
 
               <div className="w-full animate-hero-box">
@@ -302,13 +304,13 @@ const Hero = () => {
                     />
                   ))}
                   <p className="text-white font-medium whitespace-nowrap" style={{ fontSize: "clamp(12px, 1.65vw, 24px)", lineHeight: 1.4 }}>
-                    Se você precisa de
+                    {t("hero.box_line1")}
                   </p>
                   <p className="font-bold text-[#00ff88] whitespace-nowrap" style={{ fontSize: "clamp(15px, 2.0vw, 30px)", lineHeight: 1.35 }}>
-                    design, autoridade
+                    {t("hero.box_line2")}
                   </p>
                   <p className="font-bold text-[#00ff88] whitespace-nowrap" style={{ fontSize: "clamp(15px, 2.0vw, 30px)", lineHeight: 1.35 }}>
-                    e posicionamento...
+                    {t("hero.box_line3")}
                   </p>
                 </div>
               </div>
@@ -335,7 +337,7 @@ const Hero = () => {
                     className="shrink-0"
                     style={{ width: "clamp(26px, 3.2vw, 48px)", height: "clamp(26px, 3.2vw, 48px)", objectFit: "contain" }}
                   />
-                  <span className="whitespace-nowrap">Fale comigo!</span>
+                  <span className="whitespace-nowrap">{t("hero.cta_whatsapp")}</span>
                 </a>
               </div>
 
@@ -373,7 +375,7 @@ const Hero = () => {
                 loading="eager"
               />
               <span className="absolute inset-0 flex items-center justify-center font-boldonse text-white sm:text-xl md:text-2xl lg:text-[34px] tracking-tight lowercase select-none animate-hero-ribbon-text drop-shadow-md">
-                designer & diretor de arte
+                {t("hero.ribbon")}
               </span>
             </div>
           </div>
@@ -388,8 +390,8 @@ const Hero = () => {
           }}
         >
           <p className="text-xs sm:text-base md:text-lg text-white font-normal leading-relaxed">
-            <span className="text-[#00ff88] font-bold">Prazer, eu me chamo Leo!</span>{" "}
-            Sou apaixonado por dar vida a projetos através da arte e do design.
+            <span className="text-[#00ff88] font-bold">{t("hero.intro_p1")}</span>{" "}
+            {t("hero.intro_p2")}
           </p>
         </div>
 
@@ -401,8 +403,8 @@ const Hero = () => {
         {/* Secondary description below carousel */}
         <div className="text-center max-w-3xl mx-auto px-4" style={{ marginTop: "clamp(8px, 2vw, 24px)" }}>
           <p className="text-xs sm:text-base md:text-lg text-white/90 leading-relaxed">
-            <span className="text-white/80">Graduado em Design e pós graduado em Direção de arte, atuo no visual desde 2019 e </span>
-            <span className="text-[#00ff88] font-bold">trabalho desenvolvendo projetos de todo tipo que possa imaginar:</span>
+            <span className="text-white/80">{t("hero.outro_p1")}</span>
+            <span className="text-[#00ff88] font-bold">{t("hero.outro_p2")}</span>
           </p>
         </div>
       </div>

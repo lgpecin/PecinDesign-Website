@@ -20,7 +20,6 @@ const mainSections = [
   { id: 'home', label: 'Início', icon: Home },
   { id: 'portfolio', label: 'Portfólio', icon: FolderOpen },
   { id: 'services', label: 'Orçamentos', icon: DollarSign },
-  { id: 'statistics', label: 'Estatísticas', icon: BarChart3 },
   { id: 'settings', label: 'Configurações', icon: Settings },
 ];
 

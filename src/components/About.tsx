@@ -2,29 +2,31 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { AnimatedSection } from "@/components/AnimatedSection";
 import aboutPhotoPlaceholder from "@/assets/about-photo-placeholder.png";
 import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
-
-const timelineItems = [
-  {
-    year: "2019",
-    text: "Sempre brinquei de contar histórias, desenhar e até mexer com programas de design. 2019 foi quando comecei a atuar na área e em 2021 iniciei minha graduação em design.",
-  },
-  {
-    year: "2024",
-    text: "Após finalizar a faculdade e emendar em uma pós graduação em direção de arte. Eu já tinha percorrido alguns estágios e freelances onde desenvolvi diversas habilidades.",
-  },
-  {
-    year: "2026",
-    text: "Após seis anos no mercado, criei minha própria marca e me lancei ao mercado dos autônomos, onde consegui meu primeiro grande cliente, o Grupo Barigui, onde atuo até hoje como designer das Marcas Premium (Ford, BMW, Audi, Mini, Motorrad).",
-  },
-  {
-    year: "Sua vez",
-    text: "Agora é a vez do seu projeto ganhar vida e dar o próximo passo no mercado.",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const About = () => {
   const { settings } = useSiteSettings();
+  const { t } = useLanguage();
   const whatsappLink = `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(settings.whatsapp_message)}`;
+
+  const timelineItems = [
+    {
+      year: t("about.t2019_badge"),
+      text: t("about.t2019_desc"),
+    },
+    {
+      year: t("about.t2024_badge"),
+      text: t("about.t2024_desc"),
+    },
+    {
+      year: t("about.t2026_badge"),
+      text: t("about.t2026_desc"),
+    },
+    {
+      year: t("about.tyourturn_badge"),
+      text: t("about.tyourturn_desc"),
+    },
+  ];
 
   return (
     <section
@@ -95,7 +97,7 @@ const About = () => {
                   <WhatsAppIcon className="w-5 h-5 sm:w-7 sm:h-7 md:w-10 md:h-10 text-[#ccff00] shrink-0 group-hover:scale-110 transition-transform duration-300" />
                   
                   <span className="font-boldonse text-base sm:text-2xl md:text-3xl lg:text-4xl text-[#ccff00] tracking-wide whitespace-nowrap">
-                    Fale comigo!
+                    {t("about.cta_button")}
                   </span>
                 </a>
               </div>

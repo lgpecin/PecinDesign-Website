@@ -4,9 +4,11 @@ import stripesDecoration from "@/assets/redesign/stripes-decoration.png";
 import BehanceIcon from "@/components/icons/BehanceIcon";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { AnimatedSection } from "@/components/AnimatedSection";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Contact = () => {
   const { settings } = useSiteSettings();
+  const { t } = useLanguage();
   const whatsappLink = `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(settings.whatsapp_message)}`;
 
   return (
@@ -32,12 +34,12 @@ const Contact = () => {
 
             {/* Title */}
             <h2 className="font-boldonse text-3xl sm:text-4xl md:text-5xl text-white mb-3 tracking-wide">
-              Vamos Conversar?
+              {t("contact.title")}
             </h2>
 
             {/* Subtitle */}
             <p className="text-neutral-400 text-sm sm:text-base md:text-lg mb-7 font-normal">
-              Tem um projeto em mente? Fale comigo por WhatsApp.
+              {t("contact.subtitle")}
             </p>
 
             {/* WhatsApp CTA Button */}
@@ -52,7 +54,7 @@ const Contact = () => {
                 alt="WhatsApp"
                 className="w-6 h-6 sm:w-7 sm:h-7 object-contain shrink-0"
               />
-              <span>Chamar no WhatsApp</span>
+              <span>{t("contact.cta_whatsapp")}</span>
             </a>
 
             {/* Social Media Icons directly below WhatsApp button */}
