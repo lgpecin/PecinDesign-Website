@@ -163,56 +163,56 @@ const Services = () => {
     <section
       id="services"
       ref={ref}
-      className="relative w-full py-16 sm:py-24 md:py-28 overflow-hidden bg-white transition-opacity duration-700"
+      className="relative w-full pt-8 sm:pt-16 md:pt-24 pb-14 sm:pb-24 md:pb-28 overflow-hidden bg-white transition-opacity duration-700"
       style={{
         backgroundColor: "#ffffff",
         backgroundImage: `radial-gradient(circle, rgba(0, 0, 0, 0.08) 1.5px, transparent 1.5px)`,
         backgroundSize: "24px 24px",
       }}
     >
-      {/* Corner dots decorations (4 cantos da seção branca - Aumentados e 100% visíveis) */}
+      {/* Corner dots decorations (4 cantos da seção branca) */}
       <img
         src={dotsVariant1}
         alt=""
-        className="dots-decoration top-2 left-2 sm:top-4 sm:left-4 w-28 sm:w-40 md:w-52 lg:w-60 h-auto pointer-events-none opacity-100 z-10 drop-shadow-sm"
+        className="dots-decoration top-1 left-1 sm:top-4 sm:left-4 w-20 sm:w-36 md:w-52 lg:w-60 h-auto pointer-events-none opacity-90 z-10 drop-shadow-sm"
         aria-hidden="true"
       />
       <img
         src={dotsVariant2}
         alt=""
-        className="dots-decoration top-2 right-2 sm:top-4 sm:right-4 w-28 sm:w-40 md:w-52 lg:w-60 h-auto pointer-events-none opacity-100 z-10 drop-shadow-sm"
+        className="dots-decoration top-1 right-1 sm:top-4 sm:right-4 w-20 sm:w-36 md:w-52 lg:w-60 h-auto pointer-events-none opacity-90 z-10 drop-shadow-sm"
         aria-hidden="true"
       />
       <img
         src={dotsVariant3}
         alt=""
-        className="dots-decoration bottom-2 left-2 sm:bottom-4 sm:left-4 w-28 sm:w-40 md:w-52 lg:w-60 h-auto pointer-events-none opacity-100 z-10 drop-shadow-sm"
+        className="dots-decoration bottom-1 left-1 sm:bottom-4 sm:left-4 w-20 sm:w-36 md:w-52 lg:w-60 h-auto pointer-events-none opacity-90 z-10 drop-shadow-sm"
         aria-hidden="true"
       />
       <img
         src={dotsVariant4}
         alt=""
-        className="dots-decoration bottom-2 right-2 sm:bottom-4 sm:right-4 w-28 sm:w-40 md:w-52 lg:w-60 h-auto pointer-events-none opacity-100 z-10 drop-shadow-sm"
+        className="dots-decoration bottom-1 right-1 sm:bottom-4 sm:right-4 w-20 sm:w-36 md:w-52 lg:w-60 h-auto pointer-events-none opacity-90 z-10 drop-shadow-sm"
         aria-hidden="true"
       />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
+      <div className="max-w-5xl mx-auto px-6 sm:px-8 md:px-6 relative z-10">
         {/* Section Title com animação ao surgir */}
         <div
-          className={`text-center mb-10 sm:mb-14 transition-all duration-700 ${
+          className={`text-center mb-8 sm:mb-14 transition-all duration-700 ${
             isInView ? "opacity-100 translate-y-0 filter-none" : "opacity-0 translate-y-8 blur-sm"
           }`}
         >
-          <h2 className="font-boldonse text-4xl sm:text-5xl md:text-6xl text-[#064e3b] tracking-tight">
+          <h2 className="font-boldonse text-3xl sm:text-5xl md:text-6xl text-[#064e3b] tracking-tight">
             Meus Serviços
           </h2>
         </div>
 
         {/* ── ÁREA PRINCIPAL: CONTAINER DE DIMENSÃO FIXA ── */}
-        <div className="relative w-full max-w-4xl mx-auto min-h-[420px] sm:min-h-[530px] md:min-h-[550px]">
+        <div className="relative w-full max-w-[330px] sm:max-w-xl md:max-w-4xl mx-auto min-h-[420px] sm:min-h-[530px] md:min-h-[550px]">
           {/* VISÃO 1: Grid com os 6 blocos */}
           <div
-            className={`w-full grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 transition-all duration-300 ${
+            className={`w-full grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-6 transition-all duration-300 ${
               selectedService ? "opacity-0 pointer-events-none" : isInView ? "opacity-100 scale-100 filter-none" : "opacity-0 scale-95 blur-sm"
             }`}
           >
@@ -228,7 +228,7 @@ const Services = () => {
                 <img
                   src={service.src}
                   alt={`${service.title} - ${service.subtitle}`}
-                  className="w-full h-auto max-w-md transition-all duration-300 group-hover:scale-[1.03] group-hover:-translate-y-1 group-hover:drop-shadow-2xl drop-shadow-md active:scale-[0.98]"
+                  className="w-full h-auto max-w-[300px] sm:max-w-md transition-all duration-300 group-hover:scale-[1.03] group-hover:-translate-y-1 group-hover:drop-shadow-2xl drop-shadow-md active:scale-[0.98]"
                   loading="lazy"
                   decoding="async"
                 />

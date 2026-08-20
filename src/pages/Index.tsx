@@ -220,9 +220,9 @@ const Index = () => {
       
         {/* Portfolio Section */}
         <section id="projects" className="py-16 sm:py-24 relative overflow-hidden" aria-label={t("nav.projects")}>
-          {/* Decorative Vector Flower (Topo Direito) com rotação suave no scroll */}
+          {/* Decorative Vector Flower (Topo Direito) com rotação suave no scroll - Oculto no mobile para legibilidade */}
           <div
-            className="absolute -right-8 sm:-right-16 top-10 sm:top-20 w-36 sm:w-56 md:w-72 h-auto text-white pointer-events-none z-0 transition-transform duration-75 will-change-transform opacity-95 drop-shadow-[0_0_25px_rgba(255,255,255,0.18)]"
+            className="hidden sm:block absolute -right-12 sm:-right-16 md:-right-20 top-10 sm:top-20 w-40 sm:w-56 md:w-72 h-auto text-white pointer-events-none z-0 transition-transform duration-75 will-change-transform opacity-95 drop-shadow-[0_0_25px_rgba(255,255,255,0.18)]"
             style={{
               transform: `rotate(${scrollY * 0.05}deg)`,
             }}
@@ -230,9 +230,9 @@ const Index = () => {
             <img src={vectorFlower} alt="" className="w-full h-auto" />
           </div>
 
-          {/* Decorative Vector Asterisk (Baixo Esquerdo) com rotação suave no scroll */}
+          {/* Decorative Vector Asterisk (Baixo Esquerdo) com rotação suave no scroll - Oculto no mobile para legibilidade */}
           <div
-            className="absolute -left-8 sm:-left-16 bottom-24 sm:bottom-36 w-32 sm:w-52 md:w-64 h-auto text-white pointer-events-none z-0 transition-transform duration-75 will-change-transform opacity-95 drop-shadow-[0_0_25px_rgba(255,255,255,0.18)]"
+            className="hidden sm:block absolute -left-12 sm:-left-16 md:-left-20 bottom-24 sm:bottom-36 w-36 sm:w-52 md:w-64 h-auto text-white pointer-events-none z-0 transition-transform duration-75 will-change-transform opacity-95 drop-shadow-[0_0_25px_rgba(255,255,255,0.18)]"
             style={{
               transform: `rotate(${-scrollY * 0.05}deg)`,
             }}

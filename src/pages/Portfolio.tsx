@@ -195,7 +195,7 @@ const Portfolio = () => {
 
       <main className="pt-28 sm:pt-36 pb-20 relative overflow-hidden">
         <div
-          className="absolute -right-12 sm:-right-20 top-20 sm:top-28 w-44 sm:w-64 md:w-80 h-auto text-white pointer-events-none z-0 transition-transform duration-75 will-change-transform opacity-95 drop-shadow-[0_0_30px_rgba(255,255,255,0.18)]"
+          className="hidden sm:block absolute -right-12 sm:-right-20 md:-right-24 top-10 sm:top-24 w-40 sm:w-64 md:w-80 h-auto text-white pointer-events-none z-0 transition-transform duration-75 will-change-transform opacity-95 drop-shadow-[0_0_30px_rgba(255,255,255,0.18)]"
           style={{
             transform: `rotate(${scrollY * 0.05}deg)`,
           }}
@@ -204,7 +204,7 @@ const Portfolio = () => {
         </div>
 
         <div
-          className="absolute -left-12 sm:-left-20 bottom-32 sm:bottom-48 w-40 sm:w-60 md:w-72 h-auto text-white pointer-events-none z-0 transition-transform duration-75 will-change-transform opacity-95 drop-shadow-[0_0_30px_rgba(255,255,255,0.18)]"
+          className="hidden sm:block absolute -left-12 sm:-left-20 md:-left-24 bottom-32 sm:bottom-48 w-40 sm:w-60 md:w-72 h-auto text-white pointer-events-none z-0 transition-transform duration-75 will-change-transform opacity-95 drop-shadow-[0_0_30px_rgba(255,255,255,0.18)]"
           style={{
             transform: `rotate(${-scrollY * 0.05}deg)`,
           }}

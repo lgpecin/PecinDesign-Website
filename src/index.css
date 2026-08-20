@@ -99,6 +99,13 @@ All colors MUST be HSL.
     overflow-y: overlay;
   }
 
+  /* Reduz 15% da escala geral no mobile para melhor proporção e respiro */
+  @media (max-width: 768px) {
+    html {
+      font-size: 85%;
+    }
+  }
+
   /* Scrollbar overlay - não corta o conteúdo */
   ::-webkit-scrollbar {
     width: 10px;

@@ -81,7 +81,7 @@ const InfiniteCarousel = () => {
   const duration = images.length * speed;
 
   return (
-    <div className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden py-4 sm:py-6 my-4">
+    <div className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden py-3 sm:py-6 my-2 sm:my-4">
       {/* Soft radial glow */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -101,7 +101,7 @@ const InfiniteCarousel = () => {
             key={i}
             src={src}
             alt={`Portfolio ${(i % images.length) + 1}`}
-            className="h-[280px] sm:h-[380px] md:h-[440px] w-auto flex-shrink-0 object-cover"
+            className="h-[180px] sm:h-[320px] md:h-[440px] w-auto flex-shrink-0 object-cover select-none pointer-events-none"
             loading="eager"
             decoding="async"
             draggable={false}

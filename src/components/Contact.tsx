@@ -10,7 +10,7 @@ const Contact = () => {
   const whatsappLink = `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(settings.whatsapp_message)}`;
 
   return (
-    <section id="contact" className="relative py-16 sm:py-24 overflow-hidden bg-[#0d0f11]">
+    <section id="contact" className="relative pt-10 sm:pt-14 pb-16 sm:pb-20 overflow-hidden bg-[#0d0f11]">
       {/* Full-width Green Stripes Illustration */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden flex items-center justify-between">
         <img

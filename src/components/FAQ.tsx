@@ -35,7 +35,7 @@ const FAQ = () => {
   return (
     <section
       id="faq"
-      className="relative py-20 sm:py-28 overflow-hidden"
+      className="relative pt-16 sm:pt-24 pb-8 sm:pb-12 overflow-hidden"
       style={{
         backgroundColor: "#053825",
         backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.06) 1.5px, transparent 1.5px)`,
@@ -74,7 +74,7 @@ const FAQ = () => {
 
         {/* Footer text */}
         <AnimatedSection index={2}>
-          <p className="text-center text-white/80 text-xs sm:text-sm md:text-base mt-10 max-w-lg mx-auto leading-relaxed">
+          <p className="text-center text-white/80 text-xs sm:text-sm md:text-base mt-8 sm:mt-10 max-w-lg mx-auto leading-relaxed">
             Tem alguma outra dúvida? Fique a vontade pra me dar um alô, a gente conversa e desenrola sua ideia!
           </p>
         </AnimatedSection>

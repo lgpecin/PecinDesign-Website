@@ -60,7 +60,7 @@ const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 80);
+    const handleScroll = () => setIsScrolled(window.scrollY > 40);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -150,10 +150,12 @@ const Navigation = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 py-4 px-6 sm:px-12 transition-all duration-300">
       <div className="max-w-7xl mx-auto flex items-center justify-between relative">
-        {/* Logo (Top Left) */}
+        {/* Logo (Top Left) — Desaparece suavemente no mobile ao scrollar */}
         <button
           onClick={() => handleNavClick("hero")}
-          className="hover:opacity-80 transition-opacity active:scale-95 flex items-center"
+          className={`hover:opacity-80 transition-all duration-500 active:scale-95 flex items-center ${
+            isScrolled ? "max-md:opacity-0 max-md:pointer-events-none max-md:scale-90" : "opacity-100 pointer-events-auto scale-100"
+          }`}
         >
           <img src={logo} alt="Pecin Design" className="h-7 sm:h-8 w-auto drop-shadow-md" />
         </button>
