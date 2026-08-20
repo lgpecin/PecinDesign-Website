@@ -41,19 +41,16 @@ const InfiniteCarousel = () => {
   }, []);
 
   // Once images are loaded, measure the width of one set and use px-based animation
-  // This avoids Safari's buggy percentage-based translateX on max-content elements
   useEffect(() => {
     if (!trackRef.current || images.length === 0) return;
 
     const measure = () => {
       const track = trackRef.current;
       if (!track) return;
-      // Total width / 3 sets = width of one set
       const oneSetWidth = track.scrollWidth / 3;
       track.style.setProperty("--marquee-distance", `-${oneSetWidth}px`);
     };
 
-    // Measure after images load
     const imgs = trackRef.current.querySelectorAll("img");
     let loaded = 0;
     const total = imgs.length;
@@ -73,7 +70,6 @@ const InfiniteCarousel = () => {
 
     if (loaded >= total) measure();
 
-    // Also measure on resize
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
   }, [images]);
@@ -85,11 +81,14 @@ const InfiniteCarousel = () => {
   const duration = images.length * speed;
 
   return (
-    <section className="relative w-full overflow-hidden py-8 mb-12">
-      {/* Green glow background */}
-      <div className="absolute inset-0 pointer-events-none" style={{
-        background: 'radial-gradient(ellipse at center, hsl(162 75% 28% / 0.12) 0%, transparent 70%)',
-      }} />
+    <div className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden py-3 sm:py-6 my-2 sm:my-4">
+      {/* Soft radial glow */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse at center, hsl(162 75% 28% / 0.1) 0%, transparent 70%)',
+        }}
+      />
       <div
         ref={trackRef}
         className="flex carousel-track"
@@ -102,14 +101,14 @@ const InfiniteCarousel = () => {
             key={i}
             src={src}
             alt={`Portfolio ${(i % images.length) + 1}`}
-            className="h-[300px] sm:h-[400px] w-auto flex-shrink-0"
+            className="h-[180px] sm:h-[320px] md:h-[440px] w-auto flex-shrink-0 object-cover select-none pointer-events-none"
             loading="eager"
             decoding="async"
             draggable={false}
           />
         ))}
       </div>
-    </section>
+    </div>
   );
 };
 

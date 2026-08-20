@@ -1,138 +1,112 @@
-import { useEffect, useState, useRef } from "react";
 import { Users, FileText, FileSignature, Presentation, CheckCircle, Package, AlertCircle } from "lucide-react";
-import { useInView } from "@/hooks/use-in-view";
-import { TypewriterText } from "./TypewriterText";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { AnimatedSection } from "@/components/AnimatedSection";
 
 interface Step {
   icon: React.ReactNode;
-  titleKey: string;
-  descKey: string;
-  durationKey: string;
+  title: string;
+  desc: string;
+  duration: string;
 }
 
+const steps: Step[] = [
+  {
+    icon: <Users className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#00ff88]" />,
+    title: "Reunião",
+    duration: "30-60 min",
+    desc: "Conversamos sobre suas necessidades, objetivos e visão para o projeto. É o momento de alinhar expectativas e entender o que você precisa.",
+  },
+  {
+    icon: <FileText className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#00ff88]" />,
+    title: "Briefing",
+    duration: "1-2 dias",
+    desc: "Recebo todas as informações detalhadas do projeto: público-alvo, referências visuais, materiais existentes e requisitos específicos.",
+  },
+  {
+    icon: <FileSignature className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#00ff88]" />,
+    title: "Contrato",
+    duration: "1 dia",
+    desc: "Formalizamos nossa parceria com um contrato claro, definindo prazos, valores, entregas e termos de trabalho.",
+  },
+  {
+    icon: <Presentation className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#00ff88]" />,
+    title: "Apresentação",
+    duration: "5-7 dias",
+    desc: "Apresento as primeiras propostas criativas. Você terá a oportunidade de avaliar as direções visuais e dar seu feedback.",
+  },
+  {
+    icon: <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#00ff88]" />,
+    title: "Validação",
+    duration: "1-3 dias",
+    desc: "Refinamos o projeto com base no seu feedback. Fazemos os ajustes necessários até que tudo esteja perfeito.",
+  },
+  {
+    icon: <Package className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#00ff88]" />,
+    title: "Entrega Final",
+    duration: "1-2 dias",
+    desc: "Você recebe todos os arquivos finais nos formatos adequados, prontos para uso. Inclui manual de aplicação quando necessário.",
+  },
+];
+
 const ServiceSteps = () => {
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [visibleSteps, setVisibleSteps] = useState(0);
-  const [isSectionVisible, setIsSectionVisible] = useState(false);
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const { ref: titleRef, isInView } = useInView({ threshold: 0.1, triggerOnce: true });
-  const { t } = useLanguage();
-
-  const steps: Step[] = [
-    { icon: <Users className="w-12 h-12" />, titleKey: "steps.step1_title", descKey: "steps.step1_desc", durationKey: "steps.step1_duration" },
-    { icon: <FileText className="w-12 h-12" />, titleKey: "steps.step2_title", descKey: "steps.step2_desc", durationKey: "steps.step2_duration" },
-    { icon: <FileSignature className="w-12 h-12" />, titleKey: "steps.step3_title", descKey: "steps.step3_desc", durationKey: "steps.step3_duration" },
-    { icon: <Presentation className="w-12 h-12" />, titleKey: "steps.step4_title", descKey: "steps.step4_desc", durationKey: "steps.step4_duration" },
-    { icon: <CheckCircle className="w-12 h-12" />, titleKey: "steps.step5_title", descKey: "steps.step5_desc", durationKey: "steps.step5_duration" },
-    { icon: <Package className="w-12 h-12" />, titleKey: "steps.step6_title", descKey: "steps.step6_desc", durationKey: "steps.step6_duration" },
-  ];
-
-  useEffect(() => {
-    let rafId: number;
-    const handleScroll = () => {
-      if (!sectionRef.current) return;
-      rafId = requestAnimationFrame(() => {
-        if (!sectionRef.current) return;
-        const section = sectionRef.current;
-        const rect = section.getBoundingClientRect();
-        const sectionHeight = section.offsetHeight;
-        const viewportHeight = window.innerHeight;
-        const isVisible = rect.top < viewportHeight && rect.bottom > 0;
-        setIsSectionVisible(isVisible);
-        const rawProgress = Math.max(0, Math.min(1, (viewportHeight - rect.top) / (sectionHeight + viewportHeight * 0.3)));
-        setScrollProgress(rawProgress);
-        const stepsToShow = Math.min(steps.length, Math.floor(rawProgress * (steps.length + 2) * 1.2));
-        setVisibleSteps(stepsToShow);
-      });
-    };
-
-    let ticking = false;
-    const onScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          handleScroll();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    handleScroll();
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-  }, [steps.length]);
-
   return (
-    <section ref={sectionRef} className="relative py-12 md:py-16 overflow-hidden" style={{ backgroundColor: 'hsl(0 0% 5%)' }}>
+    <section className="relative py-16 sm:py-24 md:py-28 overflow-hidden bg-[#0a0a0a]">
+      {/* Subtle Grid lines */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(to_right,hsl(var(--foreground))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--foreground))_1px,transparent_1px)] [background-size:32px_32px]"
+        className="pointer-events-none absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] [background-size:40px_40px]"
       />
-      <div className="container mx-auto px-4 md:px-6 relative">
 
-        <div ref={titleRef} className="text-center mb-6">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-            <span className="inline-block transition-transform duration-200 ease-out hover:scale-105">
-              {t("steps.title")}
-            </span>
-          </h2>
-        </div>
-        
-        <p className="text-center text-base md:text-lg text-muted-foreground max-w-3xl mx-auto mb-10 md:mb-12 leading-relaxed">
-          {t("steps.subtitle")}
-        </p>
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 relative z-10 max-w-6xl">
+        <AnimatedSection>
+          <div className="text-center mb-3 sm:mb-4">
+            <h2 className="font-boldonse text-2xl sm:text-4xl md:text-5xl text-white tracking-wide leading-[1.2] sm:leading-[1.25]">
+              Como é trabalhar comigo?
+            </h2>
+          </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 max-w-6xl mx-auto">
-          {steps.map((step, index) => {
-            const rotations = [-2, 1.5, -1.2, 2, -1.8, 1.3];
-            const rot = rotations[index % rotations.length];
-            return (
-            <div key={index} style={{ transitionDelay: index < visibleSteps ? `${Math.min(index, 4) * 40}ms` : "0ms" }} className={`transition-[opacity,transform] duration-[400ms] ease-out ${index < visibleSteps ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
-              <div
-                style={{ ["--step-rot" as any]: `${rot}deg` }}
-                className="step-card bg-card border-2 border-transparent rounded-2xl p-4 md:p-5 shadow-lg h-full origin-center transition-[transform,border-color,box-shadow] duration-300 ease-out md:hover:scale-[1.03] md:hover:border-primary md:hover:shadow-[0_0_0_1px_hsl(var(--primary)/0.4),0_10px_30px_-10px_hsl(var(--primary)/0.35)]"
-              >
-                <div className="flex flex-col items-center text-center gap-2 md:gap-3">
-                  <div className="text-primary">
-                    <div className="w-7 h-7 md:w-9 md:h-9 flex items-center justify-center">
-                      {step.icon}
-                    </div>
+          <p className="text-center text-xs sm:text-sm text-neutral-400 max-w-2xl mx-auto mb-8 sm:mb-12 leading-relaxed px-2">
+            É suuuper importante que todas etapas sejam bem claras. Então, quando você entra em contato comigo para desenvolvermos um projeto, é isso que acontece:
+          </p>
+        </AnimatedSection>
+
+        {/* 6 Steps Grid (2 colunas no mobile, 3 no desktop) */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5 max-w-5xl mx-auto">
+          {steps.map((step, index) => (
+            <AnimatedSection key={index} index={index}>
+              <div className="bg-[#141416]/90 border border-white/10 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 md:p-6 text-center shadow-lg transition-all duration-300 hover:border-[#00ff88]/40 hover:bg-[#18181c] hover:scale-[1.02] flex flex-col items-center justify-between h-full">
+                <div className="flex flex-col items-center w-full">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/5 flex items-center justify-center mb-2.5 sm:mb-3">
+                    {step.icon}
                   </div>
-                  <div className="space-y-1.5">
-                    <div className="inline-block px-2 py-0.5 md:px-2.5 md:py-1 bg-primary/10 text-primary rounded-full text-[10px] md:text-xs font-medium">
-                      {t(step.durationKey)}
-                    </div>
-                    <h3 className="text-sm md:text-base font-bold text-card-foreground leading-tight">
-                      {t(step.titleKey)}
-                    </h3>
-                  </div>
-                  <p className="text-xs md:text-sm text-muted-foreground leading-snug">
-                    {t(step.descKey)}
+                  <span className="inline-block px-2.5 sm:px-3 py-0.5 bg-[#00ff88]/10 text-[#00ff88] rounded-full text-[10px] sm:text-[11px] font-semibold mb-2">
+                    {step.duration}
+                  </span>
+                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-white mb-1.5 sm:mb-2">
+                    {step.title}
+                  </h3>
+                  <p className="text-[11px] sm:text-xs md:text-sm text-neutral-400 leading-relaxed text-center">
+                    {step.desc}
                   </p>
                 </div>
               </div>
-            </div>
-            );
-          })}
+            </AnimatedSection>
+          ))}
         </div>
 
-        <div className="mt-12 md:mt-16 px-4 md:px-0">
-          <div className="max-w-3xl mx-auto">
-            <div className="bg-primary/15 border border-primary/30 rounded-xl p-4 md:p-6 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
-                  <span className="font-semibold text-foreground">{t("steps.disclaimer_label")}</span> {t("steps.disclaimer")}
-                </p>
-              </div>
+        {/* Disclaimer Alert Box */}
+        <AnimatedSection index={2}>
+          <div className="mt-8 sm:mt-10 max-w-3xl mx-auto">
+            <div className="bg-[#00ff88]/5 border border-[#00ff88]/20 rounded-xl p-3.5 sm:p-5 flex items-start gap-2.5 sm:gap-3 text-xs sm:text-sm text-neutral-300">
+              <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-[#00ff88] flex-shrink-0 mt-0.5" />
+              <p className="leading-relaxed text-[11px] sm:text-xs md:text-sm">
+                <strong className="text-white font-semibold">Observação:</strong> O cronograma de trabalho e entrega pode variar e é definido com precisão conforme a definição do escopo do projeto durante a fase de briefing e contrato.
+              </p>
             </div>
           </div>
-        </div>
+        </AnimatedSection>
       </div>
     </section>
   );
 };
+
 export default ServiceSteps;

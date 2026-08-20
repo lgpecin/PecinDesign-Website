@@ -15,6 +15,7 @@ const IndexEN = lazy(() => import("./pages/IndexEN"));
 const Admin = lazy(() => import("./pages/Admin"));
 const ServicesCatalog = lazy(() => import("./pages/ServicesCatalog"));
 const Bento = lazy(() => import("./pages/Bento"));
+const Portfolio = lazy(() => import("./pages/Portfolio"));
 const Exit = lazy(() => import("./pages/Exit"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -37,6 +38,7 @@ const AppContent = () => {
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/en" element={<IndexEN />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<Admin />} />
