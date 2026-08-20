@@ -57,6 +57,14 @@ const Navigation = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 80);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const { language, setLanguage } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
@@ -124,20 +132,17 @@ const Navigation = () => {
     setIsSquishing(true);
     setTimeout(() => setIsSquishing(false), 520);
 
-    if (sectionId === "portfolio") {
-      navigate("/portfolio");
-      return;
-    }
+    const targetElementId = sectionId === "portfolio" ? "projects" : sectionId;
 
     if (isPortfolioPage) {
       navigate("/");
       setTimeout(() => {
-        const el = document.getElementById(sectionId);
+        const el = document.getElementById(targetElementId) || document.getElementById("portfolio");
         el?.scrollIntoView({ behavior: "smooth" });
       }, 100);
     } else {
       setActiveSection(sectionId);
-      const el = document.getElementById(sectionId);
+      const el = document.getElementById(targetElementId) || document.getElementById("portfolio");
       el?.scrollIntoView({ behavior: "smooth" });
     }
   };
@@ -197,8 +202,12 @@ const Navigation = () => {
           })}
         </div>
 
-        {/* Right: Language Switcher (PT / EN) */}
-        <div className="flex items-center gap-1 bg-[#141517]/80 backdrop-blur-md border border-white/20 rounded-full p-1 shadow-md">
+        {/* Right: Language Switcher (PT / EN) — fades out on scroll */}
+        <div
+          className={`flex items-center gap-1 bg-[#141517]/80 backdrop-blur-md border border-white/20 rounded-full p-1 shadow-md transition-all duration-500 ${
+            isScrolled ? "opacity-0 pointer-events-none scale-90" : "opacity-100 pointer-events-auto scale-100"
+          }`}
+        >
           <button
             onClick={() => setLanguage("pt")}
             className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-200 ${

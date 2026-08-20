@@ -1,13 +1,9 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import whatsappLogo from "@/assets/whatsapp-logo.png";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AnimatedSection } from "@/components/AnimatedSection";
 
 const FAQ = () => {
-  const { settings } = useSiteSettings();
   const { t } = useLanguage();
-  const whatsappLink = `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(settings.whatsapp_message)}`;
 
   const faqs = [
     {
@@ -49,8 +45,8 @@ const FAQ = () => {
       <div className="container mx-auto px-6 relative z-10 max-w-4xl">
         <AnimatedSection>
           {/* Title */}
-          <h2 className="font-boldonse text-4xl sm:text-6xl md:text-7xl text-center text-[#ccff00] mb-12 tracking-wider [text-shadow:0_0_30px_rgba(204,255,0,0.3)]">
-            FICOU COM ALGUMA DÚVIDA?
+          <h2 className="font-boldonse text-4xl sm:text-6xl md:text-7xl text-center text-[#ccff00] mb-10 sm:mb-14 tracking-wider leading-[1.38] sm:leading-[1.42] md:leading-[1.45] [text-shadow:0_0_30px_rgba(204,255,0,0.3)]">
+            FICOU COM<br />ALGUMA DÚVIDA?
           </h2>
         </AnimatedSection>
 
@@ -62,9 +58,9 @@ const FAQ = () => {
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
-                className="bg-[#18181b]/95 border border-white/10 rounded-full px-6 py-1 shadow-lg transition-all hover:bg-[#27272a] hover:border-white/20 data-[state=open]:rounded-2xl"
+                className="bg-[#18181b]/95 border border-white/10 rounded-[28px] px-6 py-1 shadow-lg transition-all duration-500 ease-spring-smooth will-change-[border-radius,box-shadow,background-color] hover:bg-[#1f2125] hover:border-[#ccff00]/70 hover:shadow-[0_0_25px_rgba(204,255,0,0.35)] data-[state=open]:bg-[#1f2125] data-[state=open]:border-[#ccff00] data-[state=open]:shadow-[0_0_35px_rgba(204,255,0,0.45)] data-[state=open]:rounded-[20px]"
               >
-                <AccordionTrigger className="hover:no-underline py-3 text-white text-sm sm:text-base font-semibold text-center justify-center [&>svg]:text-white/60 [&>svg]:ml-2">
+                <AccordionTrigger className="hover:no-underline py-3 text-white text-sm sm:text-base font-semibold text-center justify-center transition-colors [&>svg]:text-white/60 [&>svg]:ml-2 group-hover:[&>svg]:text-[#ccff00]">
                   <span>{faq.question}</span>
                 </AccordionTrigger>
                 <AccordionContent className="text-neutral-300 pt-2 pb-4 text-xs sm:text-sm leading-relaxed text-center">
@@ -76,27 +72,11 @@ const FAQ = () => {
         </div>
         </AnimatedSection>
 
-        {/* Footer text & WhatsApp CTA */}
+        {/* Footer text */}
         <AnimatedSection index={2}>
           <p className="text-center text-white/80 text-xs sm:text-sm md:text-base mt-10 max-w-lg mx-auto leading-relaxed">
             Tem alguma outra dúvida? Fique a vontade pra me dar um alô, a gente conversa e desenrola sua ideia!
           </p>
-
-          <div className="flex justify-center mt-6">
-            <a
-              href={whatsappLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-8 py-3.5 bg-[#00a86b] hover:bg-[#00c980] text-white rounded-xl text-lg sm:text-xl font-bold shadow-[0_10px_30px_rgba(0,168,107,0.4)] hover:shadow-[0_15px_40px_rgba(0,168,107,0.6)] transition-all duration-300 hover:scale-105"
-            >
-              <img
-                src={whatsappLogo}
-                alt="WhatsApp"
-                className="w-7 h-7 object-contain"
-              />
-              Fale comigo!
-            </a>
-          </div>
         </AnimatedSection>
       </div>
     </section>

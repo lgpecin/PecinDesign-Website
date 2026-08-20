@@ -1,5 +1,7 @@
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { AnimatedSection } from "@/components/AnimatedSection";
+import aboutPhotoPlaceholder from "@/assets/about-photo-placeholder.png";
+import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 
 const timelineItems = [
   {
@@ -30,19 +32,19 @@ const About = () => {
       className="relative py-20 sm:py-28 overflow-hidden"
       style={{
         backgroundColor: "#053825",
-        backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.06) 1.5px, transparent 1.5px)`,
-        backgroundSize: "24px 24px",
+        backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.08) 1.5px, transparent 1.5px)`,
+        backgroundSize: "26px 26px",
       }}
     >
-      <div className="container mx-auto px-4 sm:px-6 relative z-10 max-w-6xl">
-        {/* Two-Column Grid matching reference print */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 max-w-6xl">
+        {/* Two-Column Grid matching reference design */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
           
           {/* Left Column: Timeline */}
           <div className="lg:col-span-7 relative">
             {/* Continuous Vertical White Line */}
             <div
-              className="absolute left-[24px] sm:left-[28px] top-6 bottom-4 w-[3.5px] bg-white rounded-full pointer-events-none z-0"
+              className="absolute left-[22px] sm:left-[26px] top-6 bottom-4 w-[3.5px] bg-white rounded-full pointer-events-none z-0"
               aria-hidden="true"
             />
 
@@ -51,11 +53,11 @@ const About = () => {
                 <AnimatedSection key={index} index={index}>
                   <div className="relative">
                     {/* Yellow/Lime Year Badge */}
-                    <div className="inline-flex items-center justify-center bg-[#ccff00] text-[#053825] font-bold font-boldonse text-lg sm:text-2xl px-8 sm:px-10 py-1.5 sm:py-2 rounded-full shadow-md mb-3.5">
+                    <div className="inline-flex items-center justify-center bg-[#ccff00] text-[#053825] font-bold font-boldonse text-xl sm:text-2xl md:text-3xl px-8 sm:px-10 py-1.5 sm:py-2 rounded-full shadow-md mb-3.5 select-none">
                       {item.year}
                     </div>
                     {/* Description Text */}
-                    <p className="text-white text-sm sm:text-base md:text-[16px] leading-relaxed font-normal pl-11 sm:pl-14 max-w-xl">
+                    <p className="text-white text-sm sm:text-base md:text-[16.5px] leading-relaxed font-normal pl-9 sm:pl-12 max-w-xl">
                       {item.text}
                     </p>
                   </div>
@@ -64,46 +66,35 @@ const About = () => {
             </div>
           </div>
 
-          {/* Right Column: Rotated White Frame + Overlapping Dark WhatsApp Button */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center pt-8 lg:pt-0">
-            <AnimatedSection index={2}>
-              <div className="relative w-full max-w-[360px] sm:max-w-[400px] md:max-w-[420px] mx-auto flex flex-col items-center">
+          {/* Right Column: Photo Frame Placeholder + Overlapping WhatsApp Button */}
+          <div className="lg:col-span-5 flex justify-center items-center w-full pt-10 lg:pt-0">
+            <AnimatedSection index={2} className="w-full">
+              <div className="relative w-full max-w-[340px] sm:max-w-[380px] md:max-w-[420px] mx-auto">
                 
-                {/* White Rotated Card Frame (Dimensão fixa para photo mockup) */}
-                <div
-                  className="w-full h-[460px] sm:h-[520px] md:h-[560px] bg-white rounded-[36px] sm:rounded-[44px] shadow-[0_25px_60px_rgba(0,0,0,0.5)] transition-transform duration-500 hover:scale-[1.01] flex items-center justify-center overflow-hidden border-4 border-white/20"
-                  style={{
-                    transform: "rotate(2deg)",
-                    transformOrigin: "center center",
-                  }}
-                >
-                  {/* Espaço reservado para futura foto */}
-                  <div className="w-full h-full bg-white flex items-center justify-center">
-                    {/* Placeholder limpo para foto */}
-                  </div>
+                {/* Moldura da Foto / Placeholder Image */}
+                <div className="w-full relative">
+                  <img
+                    src={aboutPhotoPlaceholder}
+                    alt="Foto Leonardo Pecin"
+                    className="w-full h-auto object-contain drop-shadow-[0_20px_45px_rgba(0,0,0,0.5)] block select-none pointer-events-none"
+                    draggable={false}
+                  />
                 </div>
 
-                {/* Overlapping Dark Floating WhatsApp Button */}
+                {/* Botão Sobreposto 'Fale comigo!' no canto inferior direito */}
                 <a
                   href={whatsappLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="absolute -bottom-5 -right-3 sm:-bottom-7 sm:-right-6 z-20 bg-[#141517] hover:bg-[#1a1c1e] border border-white/15 text-[#ccff00] rounded-[22px] sm:rounded-[26px] px-6 sm:px-8 py-3.5 sm:py-4.5 flex items-center gap-3 sm:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.75)] transition-all duration-300 hover:scale-105 active:scale-95 group cursor-pointer whitespace-nowrap"
+                  className="absolute -bottom-4 -right-2 sm:-bottom-8 sm:-right-10 md:-bottom-9 md:-right-14 z-20 bg-[#121316] hover:bg-[#191b1e] border border-white/15 text-[#ccff00] rounded-[18px] sm:rounded-[22px] md:rounded-[26px] px-4 sm:px-6 md:px-7 py-2.5 sm:py-3.5 md:py-4 flex items-center gap-2.5 sm:gap-3 md:gap-3.5 shadow-[0_20px_45px_rgba(0,0,0,0.9)] transition-all duration-300 hover:scale-105 active:scale-95 group cursor-pointer whitespace-nowrap"
                   style={{
-                    transform: "rotate(-2.8deg)",
-                    transformOrigin: "center center",
+                    transform: "rotate(-2.5deg)",
                   }}
                 >
-                  {/* WhatsApp SVG in Neon Green */}
-                  <svg
-                    viewBox="0 0 308 308"
-                    fill="#ccff00"
-                    className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 drop-shadow-sm group-hover:scale-110 transition-transform duration-300"
-                  >
-                    <path d="M227.904,176.981c-9.6-4.8-56.672-27.936-65.44-31.104c-8.768-3.168-15.136-4.8-21.504,4.8 c-6.368,9.6-24.672,31.104-30.24,37.472c-5.568,6.368-11.136,7.168-20.736,2.368c-9.6-4.8-40.544-14.944-77.216-47.648 c-28.544-25.44-47.808-56.896-53.376-66.496c-5.568-9.6-0.576-14.816,4.224-19.584c4.32-4.32,9.6-11.136,14.4-16.704 c4.8-5.568,6.368-9.6,9.6-15.968c3.168-6.368,1.6-11.968-0.8-16.768c-2.4-4.8-21.504-51.84-29.472-71.04 c-7.776-18.688-15.68-16.16-21.504-16.448c-5.568-0.288-11.936-0.288-18.304-0.288c-6.368,0-16.736,2.4-25.504,11.968 c-8.768,9.6-33.472,32.704-33.472,79.776c0,47.072,34.272,92.576,39.04,98.944c4.8,6.368,67.456,102.976,163.424,144.352 c22.816,9.856,40.64,15.744,54.56,20.16c22.944,7.296,43.84,6.272,60.352,3.808c18.432-2.752,56.672-23.168,64.64-45.504 c7.968-22.336,7.968-41.472,5.568-45.504C239.04,184.161,237.504,181.761,227.904,176.981z"/>
-                    <path d="M154,0C69.088,0,0,69.088,0,154c0,27.104,7.072,53.6,20.512,76.896L0,308l79.296-20.768 C101.888,299.712,127.52,308,154,308c84.912,0,154-69.088,154-154C308,69.088,238.912,0,154,0z M154,281.6 c-23.424,0-46.368-6.272-66.432-18.144l-4.768-2.816l-49.344,12.928l13.184-48.096l-3.104-4.928 C30.688,199.936,24.4,177.344,24.4,154C24.4,82.528,82.528,24.4,154,24.4c71.472,0,129.6,58.128,129.6,129.6 C283.6,225.472,225.472,281.6,154,281.6z"/>
-                  </svg>
-                  <span className="font-boldonse text-2xl sm:text-3xl md:text-4xl text-[#ccff00] tracking-wide whitespace-nowrap">
+                  {/* WhatsApp Vector Icon Oficial com traço nítido */}
+                  <WhatsAppIcon className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-[#ccff00] shrink-0 group-hover:scale-110 transition-transform duration-300" />
+                  
+                  <span className="font-boldonse text-xl sm:text-2xl md:text-3xl lg:text-4xl text-[#ccff00] tracking-wide whitespace-nowrap">
                     Fale comigo!
                   </span>
                 </a>

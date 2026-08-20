@@ -67,6 +67,9 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      transitionTimingFunction: {
+        "spring-smooth": "cubic-bezier(0.16, 1, 0.3, 1)",
+      },
       keyframes: {
         "accordion-down": {
           from: {
@@ -136,8 +139,8 @@ export default {
       },
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
+        "accordion-down": "accordion-down 0.45s cubic-bezier(0.16, 1, 0.3, 1)",
+        "accordion-up": "accordion-up 0.38s cubic-bezier(0.16, 1, 0.3, 1)",
         "fade-up": "fade-up 1.0s ease-out",
         "scale-in": "scale-in 1.0s ease-out",
         "float": "float 6s ease-in-out infinite",

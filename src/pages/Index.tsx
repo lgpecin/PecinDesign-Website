@@ -31,7 +31,6 @@ const InfiniteCarousel = lazy(() => import("@/components/InfiniteCarousel"));
 const ServiceSteps = lazy(() => import("@/components/ServiceSteps"));
 const FAQ = lazy(() => import("@/components/FAQ"));
 const Contact = lazy(() => import("@/components/Contact"));
-const SocialMedia = lazy(() => import("@/components/SocialMedia"));
 
 interface ProjectMedia {
   url: string;
@@ -310,7 +309,6 @@ const Index = () => {
           <ServiceSteps />
           <FAQ />
           <Contact />
-          <SocialMedia />
         </Suspense>
       </main>
 

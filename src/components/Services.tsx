@@ -209,7 +209,7 @@ const Services = () => {
         </div>
 
         {/* ── ÁREA PRINCIPAL: CONTAINER DE DIMENSÃO FIXA ── */}
-        <div className="relative w-full max-w-4xl mx-auto min-h-[500px] sm:min-h-[530px] md:min-h-[550px]">
+        <div className="relative w-full max-w-4xl mx-auto min-h-[420px] sm:min-h-[530px] md:min-h-[550px]">
           {/* VISÃO 1: Grid com os 6 blocos */}
           <div
             className={`w-full grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 transition-all duration-300 ${
@@ -296,8 +296,8 @@ const Services = () => {
                   </div>
                 </div>
 
-                {/* Coluna Direita: Ícone em destaque */}
-                <div className="md:col-span-4 flex items-center justify-center mt-2 md:mt-0">
+                {/* Coluna Direita: Ícone em destaque (hidden em telas muito pequenas) */}
+                <div className="md:col-span-4 hidden sm:flex items-center justify-center mt-2 md:mt-0">
                   <div
                     className="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-3xl bg-black/10 backdrop-blur-sm border border-black/10 flex items-center justify-center shadow-inner rotate-3 hover:rotate-6 transition-transform duration-300"
                     style={{ color: selectedService.textColor }}

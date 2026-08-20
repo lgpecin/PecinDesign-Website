@@ -34,16 +34,141 @@ const Hero = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
-        {/* Hero Visual Container (Conjunto: Foto + Painel Esquerdo + Faixa Inferior) */}
+        {/* Hero Visual Container */}
         <div className="relative w-full max-w-5xl mx-auto my-2">
-          {/* ── Bloco Superior: Foto do Pecin (Aumentada em 20%) + Textos/Box (Esquerda) ── */}
-          <div className="relative w-full">
-            {/* Foto isolada do Leonardo Pecin (5% mais perto do centro) */}
+
+          {/* ── MOBILE LAYOUT (< md): matches reference exactly ── */}
+          <div className="flex flex-col md:hidden">
+
+            {/* Main content block: left text + right photo (absolute) */}
+            <div className="relative w-full overflow-hidden">
+
+              {/* Photo — absolute top-right, full height of block */}
+              <div
+                className="absolute top-0 right-0 pointer-events-none animate-hero-photo z-0"
+                style={{ width: "46%", bottom: 0 }}
+              >
+                <img
+                  src={pecinPhotoCutout}
+                  alt="Leonardo Pecin - Designer e Diretor de Arte"
+                  className="w-full h-full object-contain object-top drop-shadow-2xl"
+                  loading="eager"
+                  fetchPriority="high"
+                />
+              </div>
+
+              {/* Left column: title + box + button */}
+              <div className="relative z-10 flex flex-col" style={{ width: "58%" }}>
+
+                {/* Title — 1 linha, fonte calibrada para caber na coluna de 58% */}
+                <h1
+                  className="font-boldonse text-white drop-shadow-lg animate-hero-title mb-2.5"
+                  style={{
+                    fontSize: "clamp(15px, 4.8vw, 20px)",
+                    lineHeight: 1.05,
+                    transform: "rotate(-1deg)",
+                    transformOrigin: "left bottom",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Opa, tudo bom?
+                </h1>
+
+                {/* Dashed selection box — sangra levemente sob a foto */}
+                <div
+                  className="relative bg-black/60 animate-hero-box mb-3"
+                  style={{
+                    border: "2px dashed rgba(255,255,255,0.85)",
+                    padding: "10px 12px",
+                    transform: "rotate(-0.4deg)",
+                    transformOrigin: "top left",
+                    width: "calc(100% + 24px)",
+                  }}
+                >
+                  {[
+                    { top: "-4px", left: "-4px" },
+                    { top: "-4px", right: "-4px" },
+                    { bottom: "-4px", left: "-4px" },
+                    { bottom: "-4px", right: "-4px" },
+                    { top: "-4px", left: "calc(50% - 4px)" },
+                    { bottom: "-4px", left: "calc(50% - 4px)" },
+                    { top: "calc(50% - 4px)", left: "-4px" },
+                    { top: "calc(50% - 4px)", right: "-4px" },
+                  ].map((pos, i) => (
+                    <span
+                      key={i}
+                      style={{
+                        position: "absolute",
+                        width: "7px",
+                        height: "7px",
+                        background: "#020403",
+                        border: "1.5px solid white",
+                        ...pos,
+                      }}
+                    />
+                  ))}
+                  <p className="text-white font-medium leading-[1.4]" style={{ fontSize: "12px" }}>Se você precisa de</p>
+                  <p className="font-bold text-[#00ff88] leading-[1.3]" style={{ fontSize: "14px" }}>design, autoridade</p>
+                  <p className="font-bold text-[#00ff88] leading-[1.3]" style={{ fontSize: "14px" }}>e posicionamento...</p>
+                </div>
+
+                {/* WhatsApp button — full width of left column */}
+                <a
+                  href={whatsappLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="animate-hero-btn w-full inline-flex items-center justify-center gap-2 bg-[#00a166] hover:bg-[#00c17a] text-white rounded-xl font-boldonse shadow-[0_5px_18px_rgba(0,161,102,0.5)] transition-all duration-300 active:scale-95"
+                  style={{ padding: "10px 14px", fontSize: "14px" }}
+                >
+                  <img src={whatsappLogo} alt="WhatsApp" className="object-contain shrink-0" style={{ width: "18px", height: "18px" }} />
+                  Fale comigo!
+                </a>
+
+                {/* Spacer to allow photo to show below button */}
+                <div style={{ height: "40px" }} aria-hidden />
+              </div>
+            </div>
+
+            {/* Ribbon — full width, zero margin-top */}
+            <div className="relative w-full animate-hero-ribbon">
+              <img
+                src={ribbonBannerBg}
+                alt=""
+                className="w-full h-auto block drop-shadow-2xl"
+                loading="eager"
+              />
+              <span className="absolute inset-0 flex items-center justify-center font-boldonse text-white tracking-tight lowercase select-none animate-hero-ribbon-text drop-shadow-md" style={{ fontSize: "clamp(13px, 4vw, 18px)" }}>
+                designer & diretor de arte
+              </span>
+            </div>
+
+            {/* Social icons — centered below ribbon */}
+            <div className="flex items-center justify-center gap-4 mt-4 mb-1 animate-hero-socials">
+              {[
+                { href: settings.instagram_url, label: "Instagram", Icon: Instagram },
+                { href: settings.linkedin_url, label: "LinkedIn", Icon: Linkedin },
+                { href: settings.behance_url, label: "Behance", Icon: BehanceIcon },
+              ].map(({ href, label, Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="w-9 h-9 rounded-full bg-[#141517] border border-white/20 flex items-center justify-center text-white/80 hover:text-white hover:border-[#00ff88] transition-all hover:scale-110 shadow-sm"
+                >
+                  <Icon className="w-4 h-4" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* ── DESKTOP LAYOUT (≥ md): Original overlapping layout ── */}
+          <div className="relative w-full hidden md:block">
+            {/* Photo */}
             <div
-              className="relative ml-auto w-[74%] sm:w-[70%] md:w-[68%] z-20 pointer-events-none animate-hero-photo"
-              style={{
-                marginRight: "3%", /* Traz a foto 5% mais perto do centro */
-              }}
+              className="relative ml-auto w-[70%] md:w-[68%] z-20 pointer-events-none animate-hero-photo"
+              style={{ marginRight: "3%" }}
             >
               <img
                 src={pecinPhotoCutout}
@@ -54,45 +179,36 @@ const Hero = () => {
               />
             </div>
 
-            {/* ========================================================================= */}
-            {/* PAINEL ESQUERDO (Título, Caixa de Seleção, Botão WhatsApp e Ícones Sociais) */}
-            {/* ========================================================================= */}
+            {/* Left panel */}
             <div
               className="absolute z-10 flex flex-col items-start"
-              style={{
-                left: "9%",          /* Mais próximo do centro para o cotovelo sobrepor */
-                top: "20%",          /* Posição vertical do bloco em relação à foto */
-                width: "37%",        /* Largura diminuída do box e do botão */
-              }}
+              style={{ left: "9%", top: "20%", width: "37%" }}
             >
-              {/* 1. TÍTULO: "Opa, tudo bom?" (Animado com desfoque e surgimento) */}
               <h1
                 className="font-boldonse text-white drop-shadow-lg whitespace-nowrap animate-hero-title"
                 style={{
-                  fontSize: "clamp(20px, 3.3vw, 38px)",     /* Fonte fluida */
+                  fontSize: "clamp(20px, 3.3vw, 38px)",
                   lineHeight: 1.15,
-                  marginBottom: "clamp(16px, 1.6vw, 24px)", /* Distância até a caixa de seleção */
-                  transform: "rotate(-1.7deg)",             /* Leve inclinação */
+                  marginBottom: "clamp(16px, 1.6vw, 24px)",
+                  transform: "rotate(-1.7deg)",
                   transformOrigin: "left bottom",
-                  marginLeft: "-5px",                       /* Recuo de 5px para a esquerda em relação ao box */
+                  marginLeft: "-5px",
                 }}
               >
                 Opa, tudo bom?
               </h1>
 
-              {/* 2. CAIXA DE SELEÇÃO PONTILHADA (Animada individualmente) */}
               <div className="w-full animate-hero-box">
                 <div
                   className="relative w-full bg-black/60"
                   style={{
-                    border: "2px dashed rgba(255,255,255,0.85)", /* Borda pontilhada branca */
-                    padding: "clamp(10px, 1.5vw, 20px) clamp(10px, 1.6vw, 22px)", /* Espaçamento interno */
-                    marginBottom: "clamp(14px, 1.4vw, 22px)",     /* Distância até o botão WhatsApp */
-                    transform: "rotate(-0.8deg)",                  /* Inclinação sutil */
+                    border: "2px dashed rgba(255,255,255,0.85)",
+                    padding: "clamp(10px, 1.5vw, 20px) clamp(10px, 1.6vw, 22px)",
+                    marginBottom: "clamp(14px, 1.4vw, 22px)",
+                    transform: "rotate(-0.8deg)",
                     transformOrigin: "top left",
                   }}
                 >
-                  {/* 8 Pontos/Alças de redimensionamento nos cantos e meios */}
                   {[
                     { top: "-5px", left: "-5px" },
                     { top: "-5px", right: "-5px" },
@@ -115,46 +231,21 @@ const Hero = () => {
                       }}
                     />
                   ))}
-
-                  {/* Texto em 3 linhas fixas */}
-                  <p
-                    className="text-white font-medium whitespace-nowrap"
-                    style={{
-                      fontSize: "clamp(12px, 1.65vw, 24px)", /* Tamanho do texto branco */
-                      lineHeight: 1.4,
-                    }}
-                  >
+                  <p className="text-white font-medium whitespace-nowrap" style={{ fontSize: "clamp(12px, 1.65vw, 24px)", lineHeight: 1.4 }}>
                     Se você precisa de
                   </p>
-                  <p
-                    className="font-bold text-[#00ff88] whitespace-nowrap"
-                    style={{
-                      fontSize: "clamp(15px, 2.0vw, 30px)",  /* Tamanho do texto verde */
-                      lineHeight: 1.35,
-                    }}
-                  >
+                  <p className="font-bold text-[#00ff88] whitespace-nowrap" style={{ fontSize: "clamp(15px, 2.0vw, 30px)", lineHeight: 1.35 }}>
                     design, autoridade
                   </p>
-                  <p
-                    className="font-bold text-[#00ff88] whitespace-nowrap"
-                    style={{
-                      fontSize: "clamp(15px, 2.0vw, 30px)",  /* Tamanho do texto verde */
-                      lineHeight: 1.35,
-                    }}
-                  >
+                  <p className="font-bold text-[#00ff88] whitespace-nowrap" style={{ fontSize: "clamp(15px, 2.0vw, 30px)", lineHeight: 1.35 }}>
                     e posicionamento...
                   </p>
                 </div>
               </div>
 
-              {/* 3. BOTÃO WHATSAPP "Fale comigo!" (Animado de forma independente) */}
               <div
                 className="w-full animate-hero-btn"
-                style={{
-                  marginBottom: "clamp(14px, 1.4vw, 22px)", /* Distância até os ícones sociais */
-                  transform: "rotate(0deg)",
-                  transformOrigin: "top left",
-                }}
+                style={{ marginBottom: "clamp(14px, 1.4vw, 22px)" }}
               >
                 <a
                   href={whatsappLink}
@@ -164,7 +255,7 @@ const Hero = () => {
                   style={{
                     width: "100%",
                     padding: "clamp(10px, 1.4vw, 18px) clamp(8px, 1.6vw, 22px)",
-                    fontSize: "clamp(13px, 1.7vw, 26px)",   /* Tamanho de fonte que se adapta sem quebrar */
+                    fontSize: "clamp(13px, 1.7vw, 26px)",
                     lineHeight: 1,
                   }}
                 >
@@ -172,23 +263,15 @@ const Hero = () => {
                     src={whatsappLogo}
                     alt="WhatsApp"
                     className="shrink-0"
-                    style={{
-                      width: "clamp(26px, 3.2vw, 48px)",   /* Ícone aumentado para destaque proporcional */
-                      height: "clamp(26px, 3.2vw, 48px)",
-                      objectFit: "contain",
-                    }}
+                    style={{ width: "clamp(26px, 3.2vw, 48px)", height: "clamp(26px, 3.2vw, 48px)", objectFit: "contain" }}
                   />
                   <span className="whitespace-nowrap">Fale comigo!</span>
                 </a>
               </div>
 
-              {/* 4. ÍCONES DE REDES SOCIAIS (Centralizados abaixo do botão) */}
               <div
                 className="w-full flex items-center justify-center animate-hero-socials"
-                style={{
-                  transform: "rotate(+1deg)",
-                  gap: "clamp(8px, 1.2vw, 18px)",             /* Espaçamento entre os círculos */
-                }}
+                style={{ gap: "clamp(8px, 1.2vw, 18px)" }}
               >
                 {[
                   { href: settings.instagram_url, label: "Instagram", Icon: Instagram },
@@ -202,10 +285,7 @@ const Hero = () => {
                     rel="noopener noreferrer"
                     aria-label={label}
                     className="rounded-full bg-[#141517] border border-white/20 flex items-center justify-center text-white/80 hover:text-white hover:border-[#00ff88] transition-all hover:scale-110 shadow-sm"
-                    style={{
-                      width: "clamp(28px, 2.8vw, 42px)",     /* Largura e altura de cada bolinha */
-                      height: "clamp(28px, 2.8vw, 42px)",
-                    }}
+                    style={{ width: "clamp(28px, 2.8vw, 42px)", height: "clamp(28px, 2.8vw, 42px)" }}
                   >
                     <Icon style={{ width: "52%", height: "52%" }} />
                   </a>
@@ -213,9 +293,8 @@ const Hero = () => {
               </div>
             </div>
           </div>
-
-          {/* ── Bloco Inferior: Faixa "designer * diretor de arte" (Centralizada e Animada a partir do centro) ── */}
-          <div className="relative w-full max-w-4xl mx-auto -mt-[8%] sm:-mt-[7%] md:-mt-[6%] z-30 animate-hero-ribbon">
+          {/* Ribbon — desktop only (mobile has its own above) */}
+          <div className="hidden md:block relative w-full max-w-4xl mx-auto md:-mt-[6%] z-30 animate-hero-ribbon">
             <div className="relative w-full flex items-center justify-center">
               <img
                 src={ribbonBannerBg}
@@ -223,19 +302,18 @@ const Hero = () => {
                 className="w-full h-auto block drop-shadow-2xl"
                 loading="eager"
               />
-              <span className="absolute inset-0 flex items-center justify-center font-boldonse text-white text-xs sm:text-lg md:text-2xl lg:text-[34px] tracking-tight lowercase select-none animate-hero-ribbon-text drop-shadow-md">
+              <span className="absolute inset-0 flex items-center justify-center font-boldonse text-white sm:text-xl md:text-2xl lg:text-[34px] tracking-tight lowercase select-none animate-hero-ribbon-text drop-shadow-md">
                 designer & diretor de arte
               </span>
             </div>
           </div>
         </div>
 
-        {/* Intro text directly below the banner (Espaçamento ajustado) */}
+        {/* Intro text directly below the banner */}
         <div className="text-center mt-10 sm:mt-12 mb-10 sm:mb-12 px-4 animate-hero-socials">
           <p className="text-sm sm:text-base md:text-lg text-white font-normal leading-relaxed">
-            <span className="text-[#00ff88] font-bold">Prazer, eu me chamo Leo!</span> Sou apaixonado por dar vida
-            <br />
-            a projetos através da arte e do design.
+            <span className="text-[#00ff88] font-bold">Prazer, eu me chamo Leo!</span>{" "}
+            Sou apaixonado por dar vida a projetos através da arte e do design.
           </p>
         </div>
 
