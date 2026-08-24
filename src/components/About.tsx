@@ -1,6 +1,6 @@
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { AnimatedSection } from "@/components/AnimatedSection";
-import aboutPhotoPlaceholder from "@/assets/about-photo-placeholder.png";
+import aboutPhoto from "@/assets/about-photo.png";
 import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -73,12 +73,12 @@ const About = () => {
             <AnimatedSection index={2} className="w-full">
               <div className="relative w-full max-w-[250px] xs:max-w-[270px] sm:max-w-[360px] md:max-w-[420px] mx-auto">
                 
-                {/* Moldura da Foto / Placeholder Image */}
+                {/* Moldura da Foto / Photo Image */}
                 <div className="w-full relative">
                   <img
-                    src={aboutPhotoPlaceholder}
-                    alt="Foto Leonardo Pecin"
-                    className="w-full h-auto object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.5)] block select-none pointer-events-none"
+                    src={aboutPhoto}
+                    alt="Leonardo Pecin"
+                    className="w-full h-auto object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.5)] block select-none pointer-events-none rounded-[36px]"
                     draggable={false}
                   />
                 </div>
