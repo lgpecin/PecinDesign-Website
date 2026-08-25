@@ -19,7 +19,7 @@ import slide6 from "@/assets/carousel/slide-6.png";
 const fallbackImages = [slide1, slide2, slide3, slide4, slide5, slide6];
 
 const InfiniteCarousel = () => {
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<string[]>(fallbackImages);
   const trackRef = useRef<HTMLDivElement>(null);
   const { settings } = useSiteSettings();
   const speed = Number(settings.carousel_speed) || 15;
@@ -31,9 +31,7 @@ const InfiniteCarousel = () => {
         .select("*")
         .order("display_order", { ascending: true });
 
-      if (error || !data || data.length === 0) {
-        setImages(fallbackImages);
-      } else {
+      if (!error && data && data.length > 0) {
         setImages(data.map((img: CarouselImage) => img.image_url));
       }
     };
@@ -73,8 +71,6 @@ const InfiniteCarousel = () => {
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
   }, [images]);
-
-  if (images.length === 0) return null;
 
   // Triple images for seamless infinite loop
   const duplicated = [...images, ...images, ...images];

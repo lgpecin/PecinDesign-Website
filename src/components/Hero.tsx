@@ -395,8 +395,8 @@ const Hero = () => {
           </p>
         </div>
 
-        {/* Infinite Carousel Showcase (Full-width fluido) */}
-        <div className="w-full" style={{ marginTop: "clamp(2px, 1vw, 16px)", marginBottom: "clamp(2px, 1vw, 16px)" }}>
+        {/* Infinite Carousel Showcase (Full-width fluido com espaço reservado) */}
+        <div className="w-full min-h-[204px] sm:min-h-[368px] md:min-h-[512px] animate-hero-carousel" style={{ marginTop: "clamp(2px, 1vw, 16px)", marginBottom: "clamp(2px, 1vw, 16px)" }}>
           <InfiniteCarousel />
         </div>
 
