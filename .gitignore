@@ -23,9 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment variables
-.env
-.env.*
+# Environment variables (keep public .env tracked for Cloudflare Pages; ignore local overrides)
+.env.local
+.env.*.local
 !.env.example
 
 # AI skills, assistants and local plans
@@ -35,9 +35,8 @@ dist-ssr
 .gemini/
 .lovable/
 
-# Supabase temp, lockfile leftovers and backups
+# Supabase temp, obsolete config and backups
 supabase/.temp/
-bun.lock
 _config.yml
 *.tmp
 *.bak
