@@ -1,4 +1,4 @@
-import { Home, FolderOpen, Users, Layers, ExternalLink, LogOut, Menu } from "lucide-react";
+import { Home, FolderOpen, Users, Layers, Globe, LogOut, Menu, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
@@ -15,7 +15,7 @@ interface DashboardLayoutProps {
   onSignOut: () => void;
 }
 
-const navItems: { id: AdminSection; label: string; icon: React.ComponentType<{ className?: string; strokeWidth?: number }> }[] = [
+const navItems: { id: AdminSection; label: string; icon: LucideIcon }[] = [
   { id: "home", label: "Início", icon: Home },
   { id: "projects", label: "Projetos", icon: FolderOpen },
   { id: "clients", label: "Clientes", icon: Users },
@@ -93,11 +93,10 @@ const DashboardLayout = ({
       <div className="space-y-1 pt-6 border-t border-[#1F2723]">
         <Link
           to="/"
-          target="_blank"
-          rel="noopener noreferrer"
+          onClick={() => setMobileOpen(false)}
           className="studio-press w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium text-[#8FA399] hover:text-white hover:bg-[#171C19]"
         >
-          <ExternalLink className="w-[17px] h-[17px] text-[#7A8C83]" strokeWidth={1.6} />
+          <Globe className="w-[17px] h-[17px] text-[#7A8C83]" strokeWidth={1.6} />
           <span>Ver site</span>
         </Link>
         <button

@@ -21,7 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { generateShortToken } from "@/lib/utils";
+import { generateRandomCode, generateSlug } from "@/lib/utils";
 import { BOARD_BLOCK_CATALOG } from "./boardDefaults";
 import { BoardBlockRenderer, type SharedBudgetView } from "./BoardBlockRenderer";
 import { BoardBlockEditorDialog } from "./BoardBlockEditorDialog";
@@ -59,8 +59,11 @@ const ClientBoardTab = ({ client }: ClientBoardTabProps) => {
     data: board,
     isLoading: boardLoading,
     error: boardError,
+    refetch: refetchBoard,
   } = useQuery({
-    queryKey: ["client_board", client.id],
+    queryKey: ["client_board", client.id, user?.id],
+    enabled: !!user?.id,
+    retry: 1,
     queryFn: async () => {
       const { data: existing, error } = await (supabase as any)
         .from("client_boards")
@@ -71,21 +74,37 @@ const ClientBoardTab = ({ client }: ClientBoardTabProps) => {
       if (error) throw error;
       if (existing) return existing as ClientBoard;
 
-      if (!user) return null;
+      const baseSlug =
+        generateSlug(client.company || client.name || "portal").slice(0, 18) ||
+        "portal";
+      const shareToken = `${baseSlug}-${generateRandomCode(8)}`;
+
       const { data: created, error: createErr } = await (supabase as any)
         .from("client_boards")
         .insert([
           {
-            user_id: user.id,
+            user_id: user!.id,
             client_id: client.id,
-            share_token: generateShortToken(12),
+            share_token: shareToken,
             is_active: true,
             title: client.company || client.name,
           },
         ])
         .select()
         .single();
-      if (createErr) throw createErr;
+
+      if (createErr) {
+        if (createErr.code === "23505") {
+          const { data: fallback, error: fbErr } = await (supabase as any)
+            .from("client_boards")
+            .select("*")
+            .eq("client_id", client.id)
+            .single();
+          if (fbErr) throw fbErr;
+          return fallback as ClientBoard;
+        }
+        throw createErr;
+      }
       return created as ClientBoard;
     },
   });
@@ -128,7 +147,7 @@ const ClientBoardTab = ({ client }: ClientBoardTabProps) => {
   const { data: sharedBudgets = [] } = useQuery({
     queryKey: ["client_shared_budgets", client.id],
     queryFn: async () => {
-      const { data: budgets, error } = await supabase
+      const { data: budgets, error } = await (supabase as any)
         .from("client_budgets")
         .select("*, items:budget_items(*)")
         .eq("client_id", client.id)
@@ -291,7 +310,27 @@ const ClientBoardTab = ({ client }: ClientBoardTabProps) => {
     return <MigrationNotice featureName="Quadro do Cliente" />;
   }
 
-  if (boardLoading || !board) {
+  if (boardError) {
+    return (
+      <div className="rounded-3xl bg-white border border-[#E5E7E2] p-8 text-center space-y-3">
+        <p className="text-sm font-semibold text-[#111412]">
+          Não foi possível carregar o Quadro deste cliente.
+        </p>
+        <p className="text-xs text-[#5E6862]">
+          {(boardError as any)?.message || "Erro inesperado ao consultar o Supabase."}
+        </p>
+        <button
+          type="button"
+          onClick={() => refetchBoard()}
+          className="studio-press inline-flex items-center gap-1.5 rounded-full bg-[#111412] hover:bg-[#232925] text-white text-xs font-semibold px-4 py-2 cursor-pointer"
+        >
+          Tentar novamente
+        </button>
+      </div>
+    );
+  }
+
+  if (!user || boardLoading || !board) {
     return (
       <div className="h-44 rounded-3xl bg-white border border-[#E5E7E2] flex items-center justify-center">
         <Loader2 className="w-5 h-5 animate-spin text-[#00A859]" />

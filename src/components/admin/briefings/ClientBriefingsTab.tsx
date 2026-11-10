@@ -24,7 +24,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { generateShortToken } from "@/lib/utils";
+import { generateRandomCode, generateSlug } from "@/lib/utils";
 import { DEFAULT_BRANDING_FIELDS, DEFAULT_BRANDING_TEMPLATE_NAME } from "./defaultBriefingTemplate";
 import { BriefingFieldsEditor } from "./BriefingTemplateBuilder";
 import { isMissingTableError, MigrationNotice } from "../MigrationNotice";
@@ -84,7 +84,10 @@ const ClientBriefingsTab = ({ client }: ClientBriefingsTabProps) => {
       if (!user) throw new Error("Não autenticado");
       const chosenTpl = templates.find((t) => t.id === selectedTemplateId);
       const snapshot = chosenTpl ? chosenTpl.schema : DEFAULT_BRANDING_FIELDS;
-      const token = generateShortToken(12);
+      const baseSlug =
+        generateSlug(client.company || client.name || "briefing").slice(0, 18) ||
+        "briefing";
+      const token = `${baseSlug}-${generateRandomCode(8)}`;
 
       const { data, error } = await (supabase as any)
         .from("client_briefings")
