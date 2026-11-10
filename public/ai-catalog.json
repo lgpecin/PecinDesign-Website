@@ -1,0 +1,10 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Pecin Design",
+    "identifier": "did:web:pecindesign.com.br",
+    "documentationUrl": "https://pecindesign.com.br/llms.txt",
+    "logoUrl": "https://pecindesign.com.br/logo.png"
+  },
+  "entries": []
+}

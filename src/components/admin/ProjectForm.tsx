@@ -229,10 +229,16 @@ const ProjectForm = ({ projectId, onSuccess, onCancel }: ProjectFormProps) => {
 
   const handleCropComplete = async (croppedBlob: Blob) => {
     try {
-      const fileName = `banner-${Date.now()}.jpg`;
+      const contentType = croppedBlob.type || 'image/webp';
+      const ext = contentType === 'image/webp' ? 'webp' : 'jpg';
+      const fileName = `banner-${Date.now()}.${ext}`;
       const { error: uploadError } = await supabase.storage
         .from('project-images')
-        .upload(fileName, croppedBlob, { contentType: 'image/jpeg', upsert: true });
+        .upload(fileName, croppedBlob, {
+          contentType,
+          cacheControl: '31536000',
+          upsert: true,
+        });
       if (uploadError) throw uploadError;
       const { data: { publicUrl } } = supabase.storage
         .from('project-images')

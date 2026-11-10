@@ -15,6 +15,7 @@ import { AnimatedSection } from "@/components/AnimatedSection";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import placeholderProject from "@/assets/placeholder-project.jpg";
+import { resolveOptimizedMedia } from "@/lib/optimizedMedia";
 import { useQuery } from "@tanstack/react-query";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -120,7 +121,7 @@ const Index = () => {
       if (shouldAnimate && !listening) {
         window.addEventListener("scroll", onScroll, { passive: true });
         listening = true;
-        applyRotation();
+        if (window.scrollY > 0) onScroll();
       } else if (!shouldAnimate && listening) {
         window.removeEventListener("scroll", onScroll);
         listening = false;
@@ -153,12 +154,13 @@ const Index = () => {
         const sortedMedia = [...(project.project_images || [])].sort(
           (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)
         );
+        const bannerUrl = resolveOptimizedMedia(project.banner_image) || placeholderProject;
         return {
           id: project.id,
           title: project.title,
           category: project.category,
-          image: project.banner_image || placeholderProject,
-          bannerImage: project.banner_image || placeholderProject,
+          image: bannerUrl,
+          bannerImage: bannerUrl,
           detailMedia: sortedMedia.map((img) => {
             const ft = img.file_type || 'image';
             if (ft === 'grid') {
@@ -168,13 +170,13 @@ const Index = () => {
                 type: 'grid' as const,
                 gridData: {
                   backgroundColor: meta?.backgroundColor || '#000000',
-                  images: meta?.images || [],
+                  images: (meta?.images || []).map((imgUrl) => resolveOptimizedMedia(imgUrl)).filter(Boolean),
                   columns: meta?.columns || 3,
                 },
               };
             }
             return {
-              url: img.image_url,
+              url: ft === 'image' ? resolveOptimizedMedia(img.image_url) : img.image_url,
               type: ft as 'image' | 'video',
               metadata: img.metadata,
             };

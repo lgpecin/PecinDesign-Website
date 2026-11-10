@@ -15,13 +15,6 @@ export const useInView = (options: UseInViewOptions = {}) => {
     const element = ref.current;
     if (!element) return;
 
-    // Checagem de posição inicial no carregamento
-    const initialRect = element.getBoundingClientRect();
-    if (initialRect.top < window.innerHeight) {
-      setIsInView(true);
-      if (triggerOnce) return;
-    }
-
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {

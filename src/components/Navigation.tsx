@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useLayoutEffect, useCallback, memo } from "react";
+import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -85,8 +85,9 @@ const Navigation = () => {
     }
   }, [currentTargetId]);
 
-  useLayoutEffect(() => {
-    updatePillPosition();
+  useEffect(() => {
+    const rafId = window.requestAnimationFrame(updatePillPosition);
+    return () => window.cancelAnimationFrame(rafId);
   }, [updatePillPosition]);
 
   useEffect(() => {
@@ -131,7 +132,7 @@ const Navigation = () => {
       }
     };
 
-    updateOnScroll();
+    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", handleScroll);

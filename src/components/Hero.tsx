@@ -1,7 +1,6 @@
 import { memo } from "react";
 import pecinPhotoCutout from "@/assets/redesign/pecin-photo-cutout.webp";
 import ribbonBannerBg from "@/assets/redesign/ribbon-banner-bg.png";
-import mysticalBg from "@/assets/redesign/mystical-bg.webp";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { Instagram, Linkedin } from "lucide-react";
 import BehanceIcon from "@/components/icons/BehanceIcon";
@@ -91,10 +90,12 @@ const Hero = () => {
       {/* Full-width edge-to-edge background illustration */}
       <div className="absolute top-0 left-0 right-0 w-full h-[800px] sm:h-[900px] md:h-[1000px] pointer-events-none overflow-hidden z-0">
         <img
-          src={mysticalBg}
+          src="/hero-bg.webp"
           alt=""
           width={1440}
           height={875}
+          loading="eager"
+          fetchPriority="high"
           decoding="async"
           className="w-full h-full object-cover object-top opacity-75"
           aria-hidden="true"

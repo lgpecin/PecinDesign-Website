@@ -1,22 +1,37 @@
 <!doctype html>
 <html lang="pt-BR">
   <head>
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-KZ7VQ5QZ');</script>
-    <!-- End Google Tag Manager -->
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZTGSB2WSGF"></script>
+    <!-- Google Tag Manager (deferred after load/interaction for faster LCP/TBT) -->
     <script>
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-ZTGSB2WSGF');
+      (function () {
+        var loaded = false;
+        function loadGTM() {
+          if (loaded) return;
+          loaded = true;
+          window.removeEventListener('scroll', loadGTM);
+          window.removeEventListener('pointerdown', loadGTM);
+          window.removeEventListener('keydown', loadGTM);
+          window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+          var f = document.getElementsByTagName('script')[0];
+          var j = document.createElement('script');
+          j.async = true;
+          j.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-KZ7VQ5QZ';
+          f.parentNode.insertBefore(j, f);
+        }
+        window.addEventListener('scroll', loadGTM, { once: true, passive: true });
+        window.addEventListener('pointerdown', loadGTM, { once: true, passive: true });
+        window.addEventListener('keydown', loadGTM, { once: true, passive: true });
+        if (document.readyState === 'complete') {
+          setTimeout(loadGTM, 1500);
+        } else {
+          window.addEventListener('load', function () {
+            setTimeout(loadGTM, 1500);
+          }, { once: true });
+        }
+      })();
     </script>
+    <!-- End Google Tag Manager -->
     
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -47,25 +62,23 @@
     <meta name="twitter:description" content="Design e direção de arte. Conheça meus projetos e serviços e fale comigo!" />
     <meta name="twitter:image" content="https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/seo/ogimage-1764711212893.png" />
     
-    <!-- Canonical Tag -->
+    <!-- Canonical & Agentic Discovery -->
     <link rel="canonical" href="https://pecindesign.com.br/" />
+    <link rel="ai-catalog" href="/.well-known/ai-catalog.json" />
     
     <!-- DNS Prefetch e Preconnect -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-    <link rel="dns-prefetch" href="https://storage.googleapis.com" />
     <link rel="dns-prefetch" href="https://snocogcaznxlkaxluwnt.supabase.co" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://storage.googleapis.com" />
-    <link rel="preconnect" href="https://snocogcaznxlkaxluwnt.supabase.co" crossorigin />
+    <link rel="preconnect" href="https://snocogcaznxlkaxluwnt.supabase.co" />
     
     <!-- Preload Critical Resources -->
     <link rel="preload" href="/fonts/Boldonse-Regular.ttf" as="font" type="font/ttf" crossorigin />
-    <link rel="preload" as="image" href="/src/assets/logo.png" fetchpriority="high" />
+    <link rel="preload" as="image" href="/hero-bg.webp" type="image/webp" fetchpriority="high" />
     
     <!-- Font Loading Otimizado -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800;900&display=swap" />
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript>
       <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800;900&display=swap" rel="stylesheet" />

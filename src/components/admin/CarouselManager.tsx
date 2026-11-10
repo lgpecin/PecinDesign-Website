@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { Trash2, GripVertical, Loader2, Upload } from "lucide-react";
+import { compressImage } from "@/lib/imageCompression";
 
 interface CarouselImage {
   id: string;
@@ -54,13 +55,23 @@ const CarouselManager = () => {
 
     setUploading(true);
     try {
+      let nextOrder = images.length;
       for (const file of Array.from(files)) {
-        const fileExt = file.name.split(".").pop();
+        const compressed = await compressImage(file, {
+          maxWidth: 1600,
+          maxHeight: 880,
+          quality: 0.88,
+          convertToWebP: true,
+        });
+        const fileExt = compressed.type === "image/webp" ? "webp" : "jpg";
         const fileName = `carousel/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
           .from("images")
-          .upload(fileName, file);
+          .upload(fileName, compressed, {
+            cacheControl: "31536000",
+            contentType: compressed.type || "image/webp",
+          });
 
         if (uploadError) throw uploadError;
 
@@ -68,11 +79,12 @@ const CarouselManager = () => {
           .from("images")
           .getPublicUrl(fileName);
 
+        nextOrder += 1;
         const { error: insertError } = await supabase
           .from("carousel_images")
           .insert({
             image_url: urlData.publicUrl,
-            display_order: images.length + 1,
+            display_order: nextOrder,
           });
 
         if (insertError) throw insertError;

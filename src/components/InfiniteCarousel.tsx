@@ -1,5 +1,6 @@
-import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveOptimizedMedia } from "@/lib/optimizedMedia";
 
 // Fallback images from assets (optimized WebP)
 import slide1 from "@/assets/carousel/slide-1.webp";
@@ -49,7 +50,6 @@ const InfiniteCarousel = () => {
   const [images, setImages] = useState<string[] | null>(null);
   const [speed, setSpeed] = useState<number>(DEFAULT_SPEED);
   const [isReady, setIsReady] = useState(false);
-  const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -90,7 +90,7 @@ const InfiniteCarousel = () => {
 
           const resolvedImages =
             !imagesRes.error && imagesRes.data && imagesRes.data.length > 0
-              ? imagesRes.data.map((img: CarouselImage) => img.image_url)
+              ? imagesRes.data.map((img: CarouselImage) => resolveOptimizedMedia(img.image_url)).filter(Boolean)
               : FALLBACK_IMAGES;
 
           const parsedSpeed = Number(speedRes.data?.setting_value);
@@ -126,7 +126,7 @@ const InfiniteCarousel = () => {
       await Promise.all([heroEntrancePromise, decodeGate]);
       if (cancelled) return;
 
-      // Defer reveal to next animation frame after DOM commit + width measurement
+      // Defer reveal to next animation frame after DOM commit
       window.requestAnimationFrame(() => {
         if (!cancelled) setIsReady(true);
       });
@@ -138,57 +138,6 @@ const InfiniteCarousel = () => {
       cancelled = true;
     };
   }, []);
-
-  const measure = useCallback(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const oneSetWidth = track.scrollWidth / 3;
-    if (oneSetWidth > 0) {
-      track.style.setProperty("--marquee-distance", `-${oneSetWidth}px`);
-    }
-  }, []);
-
-  useLayoutEffect(() => {
-    if (!images || images.length === 0) return;
-    measure();
-  }, [images, isReady, measure]);
-
-  // Keep --marquee-distance accurate after all <img> elements settle or on viewport resize
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track || !images || images.length === 0) return;
-
-    const imgs = Array.from(track.querySelectorAll("img"));
-    let settled = 0;
-    const total = imgs.length;
-
-    const onImgSettled = () => {
-      settled++;
-      if (settled >= total) measure();
-    };
-
-    const pendingImgs: HTMLImageElement[] = [];
-    imgs.forEach((img) => {
-      if (img.complete) {
-        settled++;
-      } else {
-        pendingImgs.push(img);
-        img.addEventListener("load", onImgSettled, { once: true });
-        img.addEventListener("error", onImgSettled, { once: true });
-      }
-    });
-
-    if (settled >= total) measure();
-
-    window.addEventListener("resize", measure);
-    return () => {
-      window.removeEventListener("resize", measure);
-      pendingImgs.forEach((img) => {
-        img.removeEventListener("load", onImgSettled);
-        img.removeEventListener("error", onImgSettled);
-      });
-    };
-  }, [images, measure]);
 
   const activeImages = images ?? [];
   const duplicated = activeImages.length > 0 ? [...activeImages, ...activeImages, ...activeImages] : [];
@@ -208,7 +157,6 @@ const InfiniteCarousel = () => {
         }}
       />
       <div
-        ref={trackRef}
         className={`flex w-max min-h-[180px] sm:min-h-[320px] md:min-h-[440px] ${
           isReady ? "carousel-track" : ""
         }`}

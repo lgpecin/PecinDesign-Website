@@ -73,7 +73,10 @@ const MediaUpload = ({
 
       const { error: uploadError } = await supabase.storage
         .from('project-images')
-        .upload(filePath, fileToUpload);
+        .upload(filePath, fileToUpload, {
+          cacheControl: '31536000',
+          contentType: fileToUpload.type || undefined,
+        });
 
       if (uploadError) {
         throw uploadError;

@@ -60,7 +60,7 @@ const ImageCropDialog = ({ open, onOpenChange, imageUrl, onCropComplete }: Image
         onOpenChange(false);
       }
       setProcessing(false);
-    }, 'image/jpeg', 0.95);
+    }, 'image/webp', 0.88);
   };
 
   return (

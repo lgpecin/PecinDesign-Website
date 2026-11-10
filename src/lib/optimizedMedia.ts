@@ -1,0 +1,118 @@
+/**
+ * Maps legacy Supabase Storage URLs (carousel_images, projects, project_images)
+ * to pre-compressed, resized local WebP assets served from /optimized-media/*.webp
+ * with long-lived CDN cache headers. New future uploads fall back to their URL as-is.
+ */
+const OPTIMIZED_MEDIA_MAP: Record<string, string> = {
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/images/carousel%2Fslide-1.png": "/optimized-media/c-b04be960354d.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/images/carousel%2Fslide-2.png": "/optimized-media/c-ce8975211d2c.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/images/carousel%2Fslide-3.png": "/optimized-media/c-16716b7f6379.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/images/carousel%2Fslide-4.png": "/optimized-media/c-0f7a90931277.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/images/carousel%2Fslide-5.png": "/optimized-media/c-b38a8a1ae655.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/images/carousel%2Fslide-6.png": "/optimized-media/c-55ba381ac142.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/images/carousel/1779375392526-kfbrw.png": "/optimized-media/c-f9dfa34ae1a5.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.36750472343868523.png": "/optimized-media/b-8ca594c00335.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.817653072456011.png": "/optimized-media/b-3592c615121e.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/banner-1763528314612.jpg": "/optimized-media/b-6e153ec07c11.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/banner-1764267961272.jpg": "/optimized-media/b-05e9a33781bd.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/banner-1775601587522.jpg": "/optimized-media/b-7e39641ff708.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/banner-1783639877947.jpg": "/optimized-media/b-b585482cdeb2.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.006418635099701309.webp": "/optimized-media/p-7b945109c410.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.02150253473315844.webp": "/optimized-media/p-f33c109f7c3f.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.023947019472965958.png": "/optimized-media/p-1e30f43c06a6.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.030697041186228624.webp": "/optimized-media/p-0efa0c85155f.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.034325138408430544.png": "/optimized-media/p-16c36603a3fd.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.0800639748474351.webp": "/optimized-media/p-8be7310234ac.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.09591233153885104.webp": "/optimized-media/p-d137e22d9aad.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.10171608237784124.webp": "/optimized-media/p-6e5fa74d4573.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.10577791025411254.webp": "/optimized-media/p-054270ee5ea8.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.13122022145043633.webp": "/optimized-media/p-f63392e906a4.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.13257246666948286.webp": "/optimized-media/p-34515cbb2678.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.13518951786919398.webp": "/optimized-media/p-d78c6ae9d371.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.14867705337538517.webp": "/optimized-media/p-b8afaa533a97.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.15973976041591242.webp": "/optimized-media/p-0d563f7e8b16.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.18379822420259528.webp": "/optimized-media/p-8a3e254f5362.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.18403736565461204.webp": "/optimized-media/p-bd3b9000b282.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.2003446022397325.webp": "/optimized-media/p-7b2c5c9a2668.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.2008130099335247.webp": "/optimized-media/p-666d488cb4c7.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.2550364882449142.png": "/optimized-media/p-ac13e088eccd.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.26287216172266825.webp": "/optimized-media/p-3e7b2883e845.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.28524056530103614.png": "/optimized-media/p-32f450106b5d.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.28550610665773646.webp": "/optimized-media/p-df43cef313a5.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.28722353543608015.png": "/optimized-media/p-86dccff00484.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.29031575167171475.webp": "/optimized-media/p-4fbe1acf772b.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.3029110023150531.webp": "/optimized-media/p-c0e3ca215f1f.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.3038775728039448.webp": "/optimized-media/p-ac5ac10bdea1.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.34040151108157934.webp": "/optimized-media/p-092a598bae4e.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.34131796125269276.webp": "/optimized-media/p-b16930d4803d.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.3452931424000042.webp": "/optimized-media/p-acfdfb1e2c10.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.3530798095613964.png": "/optimized-media/p-9a30de83ae61.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.36210571461088625.webp": "/optimized-media/p-3a4416475970.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.36861452960633345.webp": "/optimized-media/p-20c2e2eda5ab.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.40959983680583123.webp": "/optimized-media/p-19682b749d6c.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.4249713059450835.png": "/optimized-media/p-77282f2369e1.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.4356566409238135.png": "/optimized-media/p-affd83eb919d.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.44363115533928255.webp": "/optimized-media/p-ad01c2aa824a.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.4557687847747003.webp": "/optimized-media/p-e989da5391e9.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.45805484605497604.webp": "/optimized-media/p-3638aba978d1.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.4775444640422678.webp": "/optimized-media/p-75d33c61b40a.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.49069412406092683.png": "/optimized-media/p-fd1ebae49c22.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.49608160914605304.webp": "/optimized-media/p-fb6c0db23723.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.5079735279766553.webp": "/optimized-media/p-220cfe4f76d2.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.5183160322523128.png": "/optimized-media/p-e0fec5b65df2.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.531887222092479.webp": "/optimized-media/p-532ccd8ade30.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.533153052577927.webp": "/optimized-media/p-5bd98729eba8.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.5437148192005274.webp": "/optimized-media/p-d6e3534b2bdc.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.5536992896275877.webp": "/optimized-media/p-644c05d84415.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.5568110580149068.webp": "/optimized-media/p-2c5892a63445.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.5615603461609282.webp": "/optimized-media/p-f648b8cce66b.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.5690448595661649.webp": "/optimized-media/p-23c5895718c0.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.5871370485533605.webp": "/optimized-media/p-42d379b04658.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.5993719413599637.webp": "/optimized-media/p-1ae9b3e12eff.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.6053980525713122.webp": "/optimized-media/p-67194d8bea52.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.6194067610783466.webp": "/optimized-media/p-e030947d4168.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.6242792920061758.webp": "/optimized-media/p-8ded9e383372.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.6381628405237739.webp": "/optimized-media/p-691e4a630cca.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.6435025781548974.webp": "/optimized-media/p-e180ce193016.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.6688089485563822.png": "/optimized-media/p-f7345aed6426.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.6760067986195911.webp": "/optimized-media/p-22a735c39ca1.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.6817859650475051.webp": "/optimized-media/p-8e94e6acfcbe.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.6856392847319003.png": "/optimized-media/p-47f0586f3e69.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.7070886932137272.webp": "/optimized-media/p-4a41171d0dd9.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.7157993964419102.webp": "/optimized-media/p-a01d23f34bff.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.7559659225643853.webp": "/optimized-media/p-53e224a1b60a.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.7765748536741844.webp": "/optimized-media/p-b1a52a75ad62.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.7786611009431437.webp": "/optimized-media/p-526eecb10d6b.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.7789707754876015.png": "/optimized-media/p-f1cf6142ac21.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.7806698802803927.webp": "/optimized-media/p-63940f346284.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.7934279305506129.png": "/optimized-media/p-6fe04b65b666.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.7942029321610033.webp": "/optimized-media/p-21ffc7ab35e9.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.8246132586158923.webp": "/optimized-media/p-703e613d25a3.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.8261758785953223.webp": "/optimized-media/p-84b356b0affc.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.8515991137842215.webp": "/optimized-media/p-1c317cbd7e30.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.8643246539949564.webp": "/optimized-media/p-b9ed16619ee8.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.864867667056609.webp": "/optimized-media/p-7f888262fa3b.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.881849133995095.webp": "/optimized-media/p-0ff3a0eb5265.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.8828617161896039.webp": "/optimized-media/p-134335c217ba.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.9000715310573355.webp": "/optimized-media/p-b76995570c36.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.9166175052744854.png": "/optimized-media/p-a4c9e0f2d07c.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.9287529658312855.webp": "/optimized-media/p-3cf9a24a523f.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.9363251665594988.webp": "/optimized-media/p-a77ba4572fb4.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.941158026197275.png": "/optimized-media/p-1d2db2b02243.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.9420214646521975.webp": "/optimized-media/p-035615e22556.webp",
+  "https://snocogcaznxlkaxluwnt.supabase.co/storage/v1/object/public/project-images/0.9661863074301064.png": "/optimized-media/p-c4924db79b09.webp"
+};
+
+export function resolveOptimizedMedia(url: string | null | undefined): string {
+  if (!url) return "";
+  const trimmed = url.trim();
+  const direct = OPTIMIZED_MEDIA_MAP[trimmed];
+  if (direct) return direct;
+
+  // Handle encoded/decoded slash variants such as %2F vs /
+  const encodedCarousel = trimmed.replace("/images/carousel/", "/images/carousel%2F");
+  if (OPTIMIZED_MEDIA_MAP[encodedCarousel]) return OPTIMIZED_MEDIA_MAP[encodedCarousel];
+
+  const decoded = trimmed.replace(/%2F/gi, "/");
+  return OPTIMIZED_MEDIA_MAP[decoded] ?? trimmed;
+}
