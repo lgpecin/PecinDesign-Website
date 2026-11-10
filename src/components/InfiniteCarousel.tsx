@@ -1,5 +1,13 @@
-import { useEffect, useState, useRef } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+
+// Fallback images from assets (optimized WebP)
+import slide1 from "@/assets/carousel/slide-1.webp";
+import slide2 from "@/assets/carousel/slide-2.webp";
+import slide3 from "@/assets/carousel/slide-3.webp";
+import slide4 from "@/assets/carousel/slide-4.webp";
+import slide5 from "@/assets/carousel/slide-5.webp";
+import slide6 from "@/assets/carousel/slide-6.webp";
 
 interface CarouselImage {
   id: string;
@@ -7,24 +15,64 @@ interface CarouselImage {
   display_order: number;
 }
 
-// Fallback images from assets
-import slide1 from "@/assets/carousel/slide-1.png";
-import slide2 from "@/assets/carousel/slide-2.png";
-import slide3 from "@/assets/carousel/slide-3.png";
-import slide4 from "@/assets/carousel/slide-4.png";
-import slide5 from "@/assets/carousel/slide-5.png";
-import slide6 from "@/assets/carousel/slide-6.png";
+const FALLBACK_IMAGES = [slide1, slide2, slide3, slide4, slide5, slide6];
+const DEFAULT_SPEED = 5;
+const HERO_ENTRANCE_MS = 1150;
+const FETCH_FALLBACK_TIMEOUT_MS = 1400;
+const SAFETY_REVEAL_TIMEOUT_MS = 1800;
 
-const fallbackImages = [slide1, slide2, slide3, slide4, slide5, slide6];
+const preloadAndDecode = (urls: string[]) => {
+  const uniqueUrls = Array.from(new Set(urls));
+  return Promise.all(
+    uniqueUrls.map(
+      (url) =>
+        new Promise<void>((resolve) => {
+          const img = new Image();
+          img.decoding = "async";
+          const finish = () => {
+            if (typeof img.decode === "function") {
+              img.decode().then(resolve, resolve);
+            } else {
+              resolve();
+            }
+          };
+          img.onload = finish;
+          img.onerror = () => resolve();
+          img.src = url;
+          if (img.complete) finish();
+        })
+    )
+  );
+};
 
 const InfiniteCarousel = () => {
-  const [images, setImages] = useState<string[]>(fallbackImages);
-  const [speed, setSpeed] = useState<number>(5);
+  const [images, setImages] = useState<string[] | null>(null);
+  const [speed, setSpeed] = useState<number>(DEFAULT_SPEED);
+  const [isReady, setIsReady] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetchCarousel = async () => {
-      const [imagesRes, speedRes] = await Promise.all([
+    let cancelled = false;
+    let fetchSettled = false;
+    const mountTime = performance.now();
+
+    const heroEntrancePromise = new Promise<void>((resolve) => {
+      window.setTimeout(resolve, HERO_ENTRANCE_MS);
+    });
+
+    const safetyTimeoutPromise = new Promise<void>((resolve) => {
+      window.setTimeout(resolve, SAFETY_REVEAL_TIMEOUT_MS);
+    });
+
+    const fetchWithTimeout = new Promise<{ imgs: string[]; spd: number }>((resolve) => {
+      const fallbackTimer = window.setTimeout(() => {
+        if (!fetchSettled) {
+          fetchSettled = true;
+          resolve({ imgs: FALLBACK_IMAGES, spd: DEFAULT_SPEED });
+        }
+      }, FETCH_FALLBACK_TIMEOUT_MS);
+
+      Promise.all([
         supabase
           .from("carousel_images")
           .select("*")
@@ -34,79 +82,143 @@ const InfiniteCarousel = () => {
           .select("setting_value")
           .eq("setting_key", "carousel_speed")
           .maybeSingle(),
+      ])
+        .then(([imagesRes, speedRes]) => {
+          window.clearTimeout(fallbackTimer);
+          if (fetchSettled || cancelled) return;
+          fetchSettled = true;
+
+          const resolvedImages =
+            !imagesRes.error && imagesRes.data && imagesRes.data.length > 0
+              ? imagesRes.data.map((img: CarouselImage) => img.image_url)
+              : FALLBACK_IMAGES;
+
+          const parsedSpeed = Number(speedRes.data?.setting_value);
+          const resolvedSpeed =
+            !speedRes.error && parsedSpeed > 0 ? parsedSpeed : DEFAULT_SPEED;
+
+          resolve({ imgs: resolvedImages, spd: resolvedSpeed });
+        })
+        .catch(() => {
+          window.clearTimeout(fallbackTimer);
+          if (fetchSettled || cancelled) return;
+          fetchSettled = true;
+          resolve({ imgs: FALLBACK_IMAGES, spd: DEFAULT_SPEED });
+        });
+    });
+
+    const initCarousel = async () => {
+      const { imgs, spd } = await fetchWithTimeout;
+      if (cancelled) return;
+
+      setImages(imgs);
+      setSpeed(spd);
+
+      // Wait for first set preload/decode (capped by overall safety deadline) and Hero entrance (~1150ms)
+      const remainingSafety = Math.max(0, SAFETY_REVEAL_TIMEOUT_MS - (performance.now() - mountTime));
+      const decodeGate = Promise.race([
+        preloadAndDecode(imgs),
+        remainingSafety > 0
+          ? new Promise<void>((resolve) => window.setTimeout(resolve, remainingSafety))
+          : safetyTimeoutPromise,
       ]);
 
-      if (!imagesRes.error && imagesRes.data && imagesRes.data.length > 0) {
-        setImages(imagesRes.data.map((img: CarouselImage) => img.image_url));
-      }
+      await Promise.all([heroEntrancePromise, decodeGate]);
+      if (cancelled) return;
 
-      if (!speedRes.error && speedRes.data?.setting_value) {
-        const parsedSpeed = Number(speedRes.data.setting_value);
-        if (parsedSpeed > 0) setSpeed(parsedSpeed);
-      }
+      // Defer reveal to next animation frame after DOM commit + width measurement
+      window.requestAnimationFrame(() => {
+        if (!cancelled) setIsReady(true);
+      });
     };
-    fetchCarousel();
+
+    void initCarousel();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  // Once images are loaded, measure the width of one set and use px-based animation
-  useEffect(() => {
-    if (!trackRef.current || images.length === 0) return;
-
-    const measure = () => {
-      const track = trackRef.current;
-      if (!track) return;
-      const oneSetWidth = track.scrollWidth / 3;
+  const measure = useCallback(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const oneSetWidth = track.scrollWidth / 3;
+    if (oneSetWidth > 0) {
       track.style.setProperty("--marquee-distance", `-${oneSetWidth}px`);
-    };
+    }
+  }, []);
 
-    const imgs = trackRef.current.querySelectorAll("img");
-    let loaded = 0;
+  useLayoutEffect(() => {
+    if (!images || images.length === 0) return;
+    measure();
+  }, [images, isReady, measure]);
+
+  // Keep --marquee-distance accurate after all <img> elements settle or on viewport resize
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || !images || images.length === 0) return;
+
+    const imgs = Array.from(track.querySelectorAll("img"));
+    let settled = 0;
     const total = imgs.length;
 
-    const onLoad = () => {
-      loaded++;
-      if (loaded >= total) measure();
+    const onImgSettled = () => {
+      settled++;
+      if (settled >= total) measure();
     };
 
+    const pendingImgs: HTMLImageElement[] = [];
     imgs.forEach((img) => {
       if (img.complete) {
-        loaded++;
+        settled++;
       } else {
-        img.addEventListener("load", onLoad, { once: true });
+        pendingImgs.push(img);
+        img.addEventListener("load", onImgSettled, { once: true });
+        img.addEventListener("error", onImgSettled, { once: true });
       }
     });
 
-    if (loaded >= total) measure();
+    if (settled >= total) measure();
 
     window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, [images]);
+    return () => {
+      window.removeEventListener("resize", measure);
+      pendingImgs.forEach((img) => {
+        img.removeEventListener("load", onImgSettled);
+        img.removeEventListener("error", onImgSettled);
+      });
+    };
+  }, [images, measure]);
 
-  // Triple images for seamless infinite loop
-  const duplicated = [...images, ...images, ...images];
-  const duration = images.length * speed;
+  const activeImages = images ?? [];
+  const duplicated = activeImages.length > 0 ? [...activeImages, ...activeImages, ...activeImages] : [];
+  const duration = Math.max(activeImages.length, 1) * speed;
 
   return (
-    <div className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden py-3 sm:py-6 my-2 sm:my-4">
+    <div
+      className={`relative w-screen left-1/2 -translate-x-1/2 overflow-hidden py-3 sm:py-6 my-2 sm:my-4 min-h-[204px] sm:min-h-[368px] md:min-h-[488px] transition-[opacity,transform] duration-700 ease-carousel-reveal ${
+        isReady ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
+      }`}
+    >
       {/* Soft radial glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse at center, hsl(162 75% 28% / 0.1) 0%, transparent 70%)',
+          background: "radial-gradient(ellipse at center, hsl(162 75% 28% / 0.1) 0%, transparent 70%)",
         }}
       />
       <div
         ref={trackRef}
-        className="flex carousel-track"
-        style={{
-          animationDuration: `${duration}s`,
-        }}
+        className={`flex w-max min-h-[180px] sm:min-h-[320px] md:min-h-[440px] ${
+          isReady ? "carousel-track" : ""
+        }`}
+        style={isReady ? { animationDuration: `${duration}s` } : undefined}
       >
         {duplicated.map((src, i) => (
           <img
-            key={i}
+            key={`${src}-${i}`}
             src={src}
-            alt={`Portfolio ${(i % images.length) + 1}`}
+            alt={`Portfolio ${(i % activeImages.length) + 1}`}
             className="h-[180px] sm:h-[320px] md:h-[440px] w-auto flex-shrink-0 object-cover select-none pointer-events-none"
             loading="eager"
             decoding="async"
@@ -118,4 +230,4 @@ const InfiniteCarousel = () => {
   );
 };
 
-export default InfiniteCarousel;
+export default memo(InfiniteCarousel);

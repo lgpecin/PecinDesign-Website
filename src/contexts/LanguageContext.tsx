@@ -27,7 +27,6 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.services": "Meus Serviços",
     "nav.projects": "Portfólio",
     "nav.about": "Sobre Mim",
-    "nav.contact": "Contato",
     "nav.back_home": "Voltar ao Início",
 
     // Hero
@@ -62,15 +61,10 @@ const translations: Record<Language, Record<string, string>> = {
     "services.more_title": "E muito mais",
     "services.more_sub": "Soluções completas sob medida",
     "services.more_desc": "Apresentações comerciais, motion design, diagramação editorial, sinalização e projetos especiais desenvolvidos sob medida para sua necessidade.",
-    "services.modal_includes": "O que inclui:",
-    "services.modal_cta": "Contratar Serviço",
-    "services.modal_close": "Fechar",
 
     // Projects / Portfolio
     "projects.title": "Portfólio",
-    "projects.subtitle": "Esqueça os templates prontos. Aqui só entra suor, neurônios queimados e estratégias visuais que funcionam pra valer! Se liga:",
     "projects.filter_all": "Todos",
-    "projects.view_all": "Ver todos os projetos",
     "projects.view_full": "Conheça meu portfólio completo",
     "projects.loading": "Carregando projetos...",
     "projects.empty": "Nenhum projeto disponível nesta categoria.",
@@ -78,10 +72,8 @@ const translations: Record<Language, Record<string, string>> = {
     "projects.software_used": "Softwares Utilizados",
     "projects.notes": "Observações e Autoria",
     "projects.detail": "Detalhe",
-    "projects.technologies": "Tecnologias & Ferramentas",
 
     // About / Timeline
-    "about.title": "E quem sou eu?",
     "about.t2019_badge": "2019",
     "about.t2019_desc": "Sempre brinquei de contar histórias, desenhar e até mexer com programas de design. 2019 foi quando comecei a atuar na área e em 2021 iniciei minha graduação em design.",
     "about.t2024_badge": "2024",
@@ -132,14 +124,6 @@ const translations: Record<Language, Record<string, string>> = {
     "faq.a5": "Absolutamente! Trabalho com clientes de todo o Brasil e do mundo através de videochamadas e ferramentas de colaboração online. A comunicação remota permite flexibilidade e eficiência, mantendo a qualidade do trabalho em todos os projetos.",
     "faq.q6": "Podemos marcar uma reunião para conversar sobre meu projeto?",
     "faq.a6": "É claro! Só me mandar uma mensagem e a gente encaixa a melhor data para ambos, para conversarmos sobre ideias e projetos e também para me conhecer melhor. Se for de Maringá, dá até pra gente ir tomar um café enquanto conversamos sobre!",
-    "faq.service1": "Social Media",
-    "faq.service2": "Branding",
-    "faq.service3": "Motion Design",
-    "faq.service4": "Webdesign",
-    "faq.service5": "Ativação de Marca",
-    "faq.service6": "Criação de Ebooks",
-    "faq.service7": "Planejamento Estratégico",
-    "faq.service8": "Design de Produtos e Embalagens",
 
     // Contact
     "contact.title": "Vamos Conversar?",
@@ -156,7 +140,6 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.services": "My Services",
     "nav.projects": "Portfolio",
     "nav.about": "About Me",
-    "nav.contact": "Contact",
     "nav.back_home": "Back to Home",
 
     // Hero
@@ -191,15 +174,10 @@ const translations: Record<Language, Record<string, string>> = {
     "services.more_title": "And much more",
     "services.more_sub": "Custom complete solutions",
     "services.more_desc": "Pitch decks, motion design, editorial layout, signage, and bespoke creative projects tailored precisely to your needs.",
-    "services.modal_includes": "What's included:",
-    "services.modal_cta": "Hire Service",
-    "services.modal_close": "Close",
 
     // Projects / Portfolio
     "projects.title": "Portfolio",
-    "projects.subtitle": "Forget ready-made templates. Here you'll find sweat, burned neurons, and visual strategies that truly work! Check it out:",
     "projects.filter_all": "All",
-    "projects.view_all": "View all projects",
     "projects.view_full": "Explore full portfolio",
     "projects.loading": "Loading projects...",
     "projects.empty": "No projects available in this category.",
@@ -207,10 +185,8 @@ const translations: Record<Language, Record<string, string>> = {
     "projects.software_used": "Software Used",
     "projects.notes": "Notes & Credits",
     "projects.detail": "Detail",
-    "projects.technologies": "Technologies & Tools",
 
     // About / Timeline
-    "about.title": "Who am I?",
     "about.t2019_badge": "2019",
     "about.t2019_desc": "I've always loved storytelling, drawing, and experimenting with design tools. 2019 was when I began working in the field, and in 2021 I started my degree in Design.",
     "about.t2024_badge": "2024",
@@ -261,14 +237,6 @@ const translations: Record<Language, Record<string, string>> = {
     "faq.a5": "Absolutely! I work with clients worldwide via video calls and online collaboration tools. Remote communication offers great flexibility and efficiency.",
     "faq.q6": "Can we schedule a meeting to discuss my project?",
     "faq.a6": "Of course! Just send me a message and we'll pick the best time for both of us to chat about ideas and projects.",
-    "faq.service1": "Social Media",
-    "faq.service2": "Branding",
-    "faq.service3": "Motion Design",
-    "faq.service4": "Web Design",
-    "faq.service5": "Brand Activation",
-    "faq.service6": "Ebook Creation",
-    "faq.service7": "Strategic Planning",
-    "faq.service8": "Product & Packaging Design",
 
     // Contact
     "contact.title": "Let's Talk?",

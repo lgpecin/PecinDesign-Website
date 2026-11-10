@@ -1,0 +1,73 @@
+import {
+  BookOpen,
+  Brush,
+  Camera,
+  Clapperboard,
+  FileText,
+  Film,
+  Folder,
+  Image,
+  Images,
+  Layout,
+  LayoutGrid,
+  Lightbulb,
+  Megaphone,
+  Package,
+  Palette,
+  Pen,
+  Pencil,
+  Sparkles,
+  Star,
+  Target,
+  Video,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
+
+export const SERVICE_ICON_OPTIONS = [
+  "Image",
+  "Images",
+  "LayoutGrid",
+  "Video",
+  "Clapperboard",
+  "Palette",
+  "Star",
+  "BookOpen",
+  "FileText",
+  "Folder",
+  "Pen",
+  "Pencil",
+  "Brush",
+  "Sparkles",
+  "Lightbulb",
+] as const;
+
+export const SERVICE_ICON_MAP: Record<string, LucideIcon> = {
+  BookOpen,
+  Brush,
+  Camera,
+  Clapperboard,
+  FileText,
+  Film,
+  Folder,
+  Image,
+  Images,
+  Layout,
+  LayoutGrid,
+  Lightbulb,
+  Megaphone,
+  Package,
+  Palette,
+  Pen,
+  Pencil,
+  Sparkles,
+  Star,
+  Target,
+  Video,
+  Zap,
+};
+
+export const getServiceIcon = (iconName?: string | null): LucideIcon => {
+  if (!iconName) return Folder;
+  return SERVICE_ICON_MAP[iconName] || Folder;
+};

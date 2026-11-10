@@ -23,8 +23,6 @@ import {
   Percent,
 } from "lucide-react";
 import { toast } from "sonner";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 import logo from "@/assets/logo.png";
 import { useHourlyRate } from "@/hooks/useHourlyRate";
 import type {
@@ -546,6 +544,7 @@ const BudgetEditor = ({ client, budget, onBack }: Props) => {
     try {
       await new Promise((r) => setTimeout(r, 50));
       await document.fonts.ready;
+      const { default: html2canvas } = await import("html2canvas");
       const canvas = await html2canvas(paperRef.current, {
         scale: 2,
         backgroundColor: null,
@@ -573,6 +572,10 @@ const BudgetEditor = ({ client, budget, onBack }: Props) => {
     try {
       await new Promise((r) => setTimeout(r, 50));
       await document.fonts.ready;
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
       const canvas = await html2canvas(paperRef.current, {
         scale: 2,
         backgroundColor: null,

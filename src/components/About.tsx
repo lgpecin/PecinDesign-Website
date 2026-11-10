@@ -1,6 +1,7 @@
+import { memo } from "react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { AnimatedSection } from "@/components/AnimatedSection";
-import aboutPhoto from "@/assets/about-photo.png";
+import aboutPhoto from "@/assets/about-photo.webp";
 import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -78,6 +79,10 @@ const About = () => {
                   <img
                     src={aboutPhoto}
                     alt="Leonardo Pecin"
+                    width={410}
+                    height={591}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-auto object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.5)] block select-none pointer-events-none rounded-[36px]"
                     draggable={false}
                   />
@@ -110,4 +115,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default memo(About);

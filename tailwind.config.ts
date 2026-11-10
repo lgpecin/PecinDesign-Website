@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
   darkMode: ["class"],
@@ -51,16 +52,6 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -69,6 +60,7 @@ export default {
       },
       transitionTimingFunction: {
         "spring-smooth": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "carousel-reveal": "cubic-bezier(0.22, 1, 0.36, 1)",
       },
       keyframes: {
         "accordion-down": {
@@ -87,69 +79,19 @@ export default {
             height: "0",
           },
         },
-      "fade-up": {
-        "0%": {
-          opacity: "0",
-          transform: "translateY(30px)",
+        "ping-slow": {
+          "75%, 100%": {
+            transform: "scale(2)",
+            opacity: "0",
+          },
         },
-        "100%": {
-          opacity: "1",
-          transform: "translateY(0)",
-        },
-      },
-      "scale-in": {
-        "0%": {
-          opacity: "0",
-          transform: "scale(0.95)",
-        },
-        "100%": {
-          opacity: "1",
-          transform: "scale(1)",
-        },
-      },
-      "float": {
-        "0%, 100%": {
-          transform: "translateY(0px)",
-        },
-        "50%": {
-          transform: "translateY(-20px)",
-        },
-      },
-      "pulse-slow": {
-        "0%, 100%": {
-          transform: "scale(0.97)",
-        },
-        "50%": {
-          transform: "scale(1)",
-        },
-      },
-      "blink": {
-        "0%, 100%": {
-          opacity: "1",
-        },
-        "50%": {
-          opacity: "0",
-        },
-      },
-      "ping-slow": {
-        "75%, 100%": {
-          transform: "scale(2)",
-          opacity: "0",
-        },
-      },
       },
       animation: {
         "accordion-down": "accordion-down 0.45s cubic-bezier(0.16, 1, 0.3, 1)",
         "accordion-up": "accordion-up 0.38s cubic-bezier(0.16, 1, 0.3, 1)",
-        "fade-up": "fade-up 1.0s ease-out",
-        "scale-in": "scale-in 1.0s ease-out",
-        "float": "float 6s ease-in-out infinite",
-        "pulse-slow": "pulse-slow 4s ease-in-out infinite",
-        "blink": "blink 1s step-end infinite",
-        "spin-slow": "spin 3s linear infinite",
         "ping-slow": "ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite",
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate],
 } satisfies Config;

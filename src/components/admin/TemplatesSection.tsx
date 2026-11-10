@@ -11,7 +11,7 @@ import ServiceCard from "./ServiceCard";
 import ServiceForm from "./ServiceForm";
 import ShareLinkManager from "./ShareLinkManager";
 import DataExportImport from "./DataExportImport";
-import * as Icons from "lucide-react";
+import { getServiceIcon } from "./serviceIcons";
 import {
   Dialog,
   DialogContent,
@@ -302,7 +302,7 @@ const TemplatesSection = () => {
                   ) : (
                     <div className="space-y-2">
                       {categoryServices.map((service) => {
-                        const IconComponent = service.icon ? (Icons as any)[service.icon] : Icons.Folder;
+                        const IconComponent = getServiceIcon(service.icon);
                         return (
                           <Card
                             key={service.id}

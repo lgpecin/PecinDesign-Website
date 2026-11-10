@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import whatsappLogo from "@/assets/whatsapp-logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import Navigation from "@/components/Navigation";
 import logo from "@/assets/logo.png";
@@ -11,7 +10,6 @@ import ProjectCard from "@/components/ProjectCard";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import FloatingAdminButton from "@/components/FloatingAdminButton";
 import Lightbox from "@/components/Lightbox";
-import { useInView } from "@/hooks/use-in-view";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AnimatedSection } from "@/components/AnimatedSection";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -19,7 +17,6 @@ import { supabase } from "@/integrations/supabase/client";
 import placeholderProject from "@/assets/placeholder-project.jpg";
 import { useQuery } from "@tanstack/react-query";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 // Vector SVG assets
 import vectorFlower from "@/assets/redesign/Vector.svg";
@@ -30,10 +27,38 @@ import ServiceSteps from "@/components/ServiceSteps";
 import FAQ from "@/components/FAQ";
 import Contact from "@/components/Contact";
 
+interface GridMetadata {
+  backgroundColor?: string;
+  images?: string[];
+  columns?: number;
+}
+
+interface RawProjectImage {
+  image_url: string;
+  display_order: number | null;
+  file_type: string;
+  metadata: unknown;
+}
+
+interface RawProjectRow {
+  id: string;
+  title: string;
+  category: string;
+  banner_image: string | null;
+  description: string;
+  full_description: string;
+  year: number;
+  image_spacing: number | null;
+  hide_banner: boolean | null;
+  notes: string | null;
+  project_images: RawProjectImage[] | null;
+  project_technologies: Array<{ technology: string }> | null;
+}
+
 interface ProjectMedia {
   url: string;
   type: 'image' | 'video' | 'grid';
-  metadata?: any;
+  metadata?: unknown;
   gridData?: { backgroundColor: string; images: string[]; columns?: number };
 }
 
@@ -43,7 +68,6 @@ interface Project {
   category: string;
   image: string;
   bannerImage: string;
-  bannerType: 'image' | 'video';
   detailMedia: ProjectMedia[];
   description: string;
   fullDescription: string;
@@ -55,30 +79,65 @@ interface Project {
 }
 
 const Index = () => {
-  const { ref: projectsRef, isInView: projectsInView } = useInView({ threshold: 0.1, triggerOnce: true });
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [loadingProjectId, setLoadingProjectId] = useState<string | null>(null);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string; projectIndex: number; mediaIndex: number } | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("__all__");
-  const [scrollY, setScrollY] = useState(0);
+  const flowerRef = useRef<HTMLDivElement>(null);
+  const asteriskRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const { isAdmin } = useAuth();
   const { t } = useLanguage();
-  const { settings } = useSiteSettings();
 
   useEffect(() => {
+    const desktopMq = window.matchMedia("(min-width: 640px)");
+    const reducedMq = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    let rafId = 0;
     let ticking = false;
-    const onScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          setScrollY(window.scrollY);
-          ticking = false;
-        });
-        ticking = true;
+    let listening = false;
+
+    const applyRotation = () => {
+      ticking = false;
+      const y = window.scrollY;
+      if (flowerRef.current) {
+        flowerRef.current.style.transform = `rotate(${y * 0.05}deg)`;
+      }
+      if (asteriskRef.current) {
+        asteriskRef.current.style.transform = `rotate(${-y * 0.05}deg)`;
       }
     };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        rafId = window.requestAnimationFrame(applyRotation);
+      }
+    };
+
+    const syncListener = () => {
+      const shouldAnimate = desktopMq.matches && !reducedMq.matches;
+      if (shouldAnimate && !listening) {
+        window.addEventListener("scroll", onScroll, { passive: true });
+        listening = true;
+        applyRotation();
+      } else if (!shouldAnimate && listening) {
+        window.removeEventListener("scroll", onScroll);
+        listening = false;
+        if (rafId) window.cancelAnimationFrame(rafId);
+      }
+    };
+
+    syncListener();
+    desktopMq.addEventListener("change", syncListener);
+    reducedMq.addEventListener("change", syncListener);
+
+    return () => {
+      desktopMq.removeEventListener("change", syncListener);
+      reducedMq.removeEventListener("change", syncListener);
+      if (listening) window.removeEventListener("scroll", onScroll);
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const { data: projects = [], isLoading: loading } = useQuery({
@@ -90,19 +149,20 @@ const Index = () => {
           project_technologies (technology)
         `).order('display_order', { ascending: true }).limit(20);
       if (error) throw error;
-      const formattedProjects: Project[] = (data || []).map((project: any) => {
-        const sortedMedia = project.project_images?.sort((a: any, b: any) => a.display_order - b.display_order) || [];
+      const formattedProjects: Project[] = ((data || []) as RawProjectRow[]).map((project) => {
+        const sortedMedia = [...(project.project_images || [])].sort(
+          (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)
+        );
         return {
           id: project.id,
           title: project.title,
           category: project.category,
           image: project.banner_image || placeholderProject,
           bannerImage: project.banner_image || placeholderProject,
-          bannerType: 'image' as 'image' | 'video',
-          detailMedia: sortedMedia.map((img: any) => {
+          detailMedia: sortedMedia.map((img) => {
             const ft = img.file_type || 'image';
             if (ft === 'grid') {
-              const meta = img.metadata as any;
+              const meta = (img.metadata as GridMetadata | null) ?? null;
               return {
                 url: 'grid',
                 type: 'grid' as const,
@@ -121,7 +181,7 @@ const Index = () => {
           }),
           description: project.description,
           fullDescription: project.full_description,
-          technologies: project.project_technologies?.map((t: any) => t.technology) || [],
+          technologies: project.project_technologies?.map((tech) => tech.technology) || [],
           year: (project.year ?? "").toString(),
           imageSpacing: project.image_spacing ?? 16,
           hideBanner: project.hide_banner ?? false,
@@ -164,12 +224,21 @@ const Index = () => {
   };
 
   const project = selectedProject !== null ? projects[selectedProject] : null;
-  const categories = ["__all__", ...Array.from(new Set(projects.map(p => p.category)))];
-  const filteredProjects = selectedCategory === "__all__" ? projects : projects.filter(p => p.category === selectedCategory);
-  
+  const categories = useMemo(
+    () => ["__all__", ...Array.from(new Set(projects.map((p) => p.category)))],
+    [projects]
+  );
+  const filteredProjects = useMemo(
+    () => (selectedCategory === "__all__" ? projects : projects.filter((p) => p.category === selectedCategory)),
+    [projects, selectedCategory]
+  );
+
   // Limite responsivo: 9 no desktop (3x3), 6 no mobile (2x3)
   const maxProjects = isMobile ? 6 : 9;
-  const displayedProjects = filteredProjects.slice(0, maxProjects);
+  const displayedProjects = useMemo(
+    () => filteredProjects.slice(0, maxProjects),
+    [filteredProjects, maxProjects]
+  );
 
   const handleLightboxPrevious = () => {
     if (!lightboxImage) return;
@@ -201,8 +270,6 @@ const Index = () => {
     return { hasPrevious: currentImageIndex > 0, hasNext: currentImageIndex < images.length - 1 };
   };
 
-  const whatsappLink = `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(settings.whatsapp_message)}`;
-
   return (
     <div className="min-h-screen">
       <header>
@@ -220,26 +287,22 @@ const Index = () => {
         <section id="projects" className="py-16 sm:py-24 relative overflow-hidden" aria-label={t("nav.projects")}>
           {/* Decorative Vector Flower (Topo Direito) com rotação suave no scroll - Oculto no mobile para legibilidade */}
           <div
-            className="hidden sm:block absolute -right-12 sm:-right-16 md:-right-20 top-10 sm:top-20 w-40 sm:w-56 md:w-72 h-auto text-white pointer-events-none z-0 transition-transform duration-75 will-change-transform opacity-95 drop-shadow-[0_0_25px_rgba(255,255,255,0.18)]"
-            style={{
-              transform: `rotate(${scrollY * 0.05}deg)`,
-            }}
+            ref={flowerRef}
+            className="hidden sm:block absolute -right-12 sm:-right-16 md:-right-20 top-10 sm:top-20 w-40 sm:w-56 md:w-72 h-auto text-white pointer-events-none z-0 will-change-transform opacity-95 drop-shadow-[0_0_25px_rgba(255,255,255,0.18)]"
           >
-            <img src={vectorFlower} alt="" className="w-full h-auto" />
+            <img src={vectorFlower} alt="" loading="lazy" decoding="async" className="w-full h-auto" />
           </div>
 
           {/* Decorative Vector Asterisk (Baixo Esquerdo) com rotação suave no scroll - Oculto no mobile para legibilidade */}
           <div
-            className="hidden sm:block absolute -left-12 sm:-left-16 md:-left-20 bottom-24 sm:bottom-36 w-36 sm:w-52 md:w-64 h-auto text-white pointer-events-none z-0 transition-transform duration-75 will-change-transform opacity-95 drop-shadow-[0_0_25px_rgba(255,255,255,0.18)]"
-            style={{
-              transform: `rotate(${-scrollY * 0.05}deg)`,
-            }}
+            ref={asteriskRef}
+            className="hidden sm:block absolute -left-12 sm:-left-16 md:-left-20 bottom-24 sm:bottom-36 w-36 sm:w-52 md:w-64 h-auto text-white pointer-events-none z-0 will-change-transform opacity-95 drop-shadow-[0_0_25px_rgba(255,255,255,0.18)]"
           >
-            <img src={vectorAsterisk} alt="" className="w-full h-auto" />
+            <img src={vectorAsterisk} alt="" loading="lazy" decoding="async" className="w-full h-auto" />
           </div>
 
           <div className="container mx-auto px-4 sm:px-6 relative z-10">
-            <div ref={projectsRef} className="text-center mb-10 sm:mb-14">
+            <div className="text-center mb-10 sm:mb-14">
               <h2 className="font-boldonse text-5xl sm:text-7xl md:text-8xl text-[#ccff00] mb-6 tracking-wider">
                 PORTFÓLIO
               </h2>
@@ -326,11 +389,7 @@ const Index = () => {
 
               {!project.hideBanner && (
                 <div className="relative w-full overflow-hidden rounded-2xl shadow-2xl">
-                  {project.bannerType === 'video' ? (
-                    <video src={project.bannerImage} controls className="w-full h-auto" style={{ maxWidth: '1920px', margin: '0 auto', display: 'block' }} preload="metadata" />
-                  ) : (
-                    <img src={project.bannerImage} alt={`${project.title} - Banner`} className="w-full h-auto" style={{ maxWidth: '1920px', margin: '0 auto', display: 'block' }} loading="eager" decoding="sync" />
-                  )}
+                  <img src={project.bannerImage} alt={`${project.title} - Banner`} className="w-full h-auto" style={{ maxWidth: '1920px', margin: '0 auto', display: 'block' }} loading="eager" decoding="sync" />
                 </div>
               )}
 
@@ -411,7 +470,7 @@ const Index = () => {
       <footer className="py-6 border-t border-border">
         <div className="container mx-auto px-6">
           <div className="flex flex-col items-center justify-center gap-3 text-center">
-            <img src={logo} alt="Pecin Design - Logo" className="h-8 w-auto hover:scale-110 transition-transform duration-300" loading="lazy" />
+            <img src={logo} alt="Pecin Design - Logo" width={1429} height={657} className="h-8 w-auto hover:scale-110 transition-transform duration-300" loading="lazy" decoding="async" />
             <p className="text-muted-foreground text-sm">{t("footer.rights")}</p>
           </div>
         </div>

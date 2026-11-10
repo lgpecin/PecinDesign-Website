@@ -9,10 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Copy, Trash2, ExternalLink, Download } from "lucide-react";
 import { toast } from "sonner";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import logo from "@/assets/logo.png";
-import * as Icons from "lucide-react";
 import { generateShortToken } from "@/lib/utils";
 import {
   Dialog,
@@ -389,6 +386,10 @@ const ShareLinkManager = ({ services }: ShareLinkManagerProps) => {
       console.log("Gerando canvas...");
 
       // Generate PDF with better settings
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
       const canvas = await html2canvas(container, {
         scale: 2,
         useCORS: true,

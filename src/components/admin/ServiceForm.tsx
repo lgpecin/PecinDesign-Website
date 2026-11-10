@@ -16,7 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Service } from "./budgets/types";
 import HoursPricingHelper from "./budgets/HoursPricingHelper";
-import * as Icons from "lucide-react";
+import { getServiceIcon, SERVICE_ICON_OPTIONS } from "./serviceIcons";
 
 type ServiceFormProps = {
   service: Service | null;
@@ -31,12 +31,6 @@ const categories = [
   { value: "marca", label: "Marca" },
   { value: "ebook", label: "E-book" },
   { value: "outros", label: "Outros" },
-];
-
-const iconOptions = [
-  "Image", "Images", "LayoutGrid", "Video", "Clapperboard",
-  "Palette", "Star", "BookOpen", "FileText", "Folder",
-  "Pen", "Pencil", "Brush", "Sparkles", "Lightbulb"
 ];
 
 const colorOptions = [
@@ -112,7 +106,7 @@ const ServiceForm = ({ service, onClose }: ServiceFormProps) => {
     saveMutation.mutate(formData);
   };
 
-  const SelectedIcon = (Icons as any)[formData.icon] || Icons.Folder;
+  const SelectedIcon = getServiceIcon(formData.icon);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -205,8 +199,8 @@ const ServiceForm = ({ service, onClose }: ServiceFormProps) => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {iconOptions.map((icon) => {
-                const IconComp = (Icons as any)[icon];
+              {SERVICE_ICON_OPTIONS.map((icon) => {
+                const IconComp = getServiceIcon(icon);
                 return (
                   <SelectItem key={icon} value={icon}>
                     <div className="flex items-center gap-2">

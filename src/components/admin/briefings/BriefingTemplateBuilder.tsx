@@ -11,7 +11,6 @@ import {
   Copy,
   ClipboardList,
   Sparkles,
-  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import {

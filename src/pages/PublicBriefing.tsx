@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
-import { CheckCircle2, Loader2, Upload, Plus, X, Send, Palette } from "lucide-react";
+import { CheckCircle2, Loader2, Upload, X, Send, Palette } from "lucide-react";
 import { toast } from "sonner";
 import "@/components/admin/admin.css";
 import type { BriefingField } from "@/components/admin/budgets/types";

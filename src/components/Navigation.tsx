@@ -1,16 +1,24 @@
-import { useState, useEffect, useRef, useLayoutEffect, useCallback } from "react";
+import { useState, useEffect, useRef, useLayoutEffect, useCallback, memo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-// Slime / Liquid bubble audio synthesizer using Web Audio API
+const TRACKED_SECTIONS = ["hero", "services", "projects", "about"] as const;
+let sharedAudioCtx: AudioContext | null = null;
+
+// Slime / Liquid bubble audio synthesizer using Web Audio API (single shared AudioContext)
 const playSlimeSound = () => {
   try {
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    const AudioCtx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AudioCtx) return;
-    const ctx = new AudioCtx();
+    if (!sharedAudioCtx || sharedAudioCtx.state === "closed") {
+      sharedAudioCtx = new AudioCtx();
+    }
+    const ctx = sharedAudioCtx;
     if (ctx.state === "suspended") {
-      ctx.resume();
+      void ctx.resume();
     }
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
@@ -30,17 +38,10 @@ const playSlimeSound = () => {
 
     osc.start(now);
     osc.stop(now + 0.13);
-  } catch (e) {
+  } catch {
     // Ignore if audio is restricted by browser policy
   }
 };
-
-const NAV_ITEMS = [
-  { id: "hero", label: "Início" },
-  { id: "services", label: "Meus Serviços" },
-  { id: "portfolio", label: "Portfólio" },
-  { id: "about", label: "Sobre Mim" },
-];
 
 const Navigation = () => {
   const [activeSection, setActiveSection] = useState("hero");
@@ -56,14 +57,9 @@ const Navigation = () => {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const squishTimerRef = useRef<number | null>(null);
 
   const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
@@ -102,35 +98,59 @@ const Navigation = () => {
   useEffect(() => {
     if (isPortfolioPage) {
       setActiveSection("portfolio");
-      return;
     }
 
-    const handleScroll = () => {
-      const sections = ["hero", "services", "projects", "about"];
-      const scrollPos = window.scrollY + 200;
+    let rafId = 0;
+    let ticking = false;
 
-      for (const section of sections) {
+    const updateOnScroll = () => {
+      ticking = false;
+      const scrollY = window.scrollY;
+      setIsScrolled(scrollY > 40);
+
+      if (isPortfolioPage) return;
+
+      const scrollPos = scrollY + 200;
+      for (const section of TRACKED_SECTIONS) {
         const el = document.getElementById(section);
         if (el) {
           const top = el.offsetTop;
           const height = el.offsetHeight;
           if (scrollPos >= top && scrollPos < top + height) {
-            const mappedSection = section === "projects" ? "portfolio" : section;
-            setActiveSection(mappedSection);
+            setActiveSection(section === "projects" ? "portfolio" : section);
             break;
           }
         }
       }
     };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    const handleScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        rafId = window.requestAnimationFrame(updateOnScroll);
+      }
+    };
+
+    updateOnScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
   }, [isPortfolioPage]);
+
+  useEffect(() => {
+    return () => {
+      if (squishTimerRef.current) window.clearTimeout(squishTimerRef.current);
+    };
+  }, []);
 
   const handleNavClick = (sectionId: string) => {
     // Trigger slime sound & squish physics
     playSlimeSound();
     setIsSquishing(true);
-    setTimeout(() => setIsSquishing(false), 520);
+    if (squishTimerRef.current) window.clearTimeout(squishTimerRef.current);
+    squishTimerRef.current = window.setTimeout(() => setIsSquishing(false), 520);
 
     const targetElementId = sectionId === "portfolio" ? "projects" : sectionId;
 
@@ -157,7 +177,14 @@ const Navigation = () => {
             isScrolled ? "max-md:opacity-0 max-md:pointer-events-none max-md:scale-90" : "opacity-100 pointer-events-auto scale-100"
           }`}
         >
-          <img src={logo} alt="Pecin Design" className="h-7 sm:h-8 w-auto drop-shadow-md" />
+          <img
+            src={logo}
+            alt="Pecin Design"
+            width={1429}
+            height={657}
+            decoding="async"
+            className="h-7 sm:h-8 w-auto drop-shadow-md"
+          />
         </button>
 
         {/* Center Pill Navigation with Slime Physics */}
@@ -241,4 +268,4 @@ const Navigation = () => {
   );
 };
 
-export default Navigation;
+export default memo(Navigation);

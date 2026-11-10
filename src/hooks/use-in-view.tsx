@@ -17,18 +17,19 @@ export const useInView = (options: UseInViewOptions = {}) => {
 
     // Checagem de posição inicial no carregamento
     const initialRect = element.getBoundingClientRect();
-    if (initialRect.top < window.innerHeight && initialRect.bottom > 0) {
+    if (initialRect.top < window.innerHeight) {
       setIsInView(true);
-    } else if (initialRect.bottom <= 0) {
-      // Elemento já passou acima da tela no carregamento inicial
-      setIsInView(true);
+      if (triggerOnce) return;
     }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsInView(true);
-        } else {
+          if (triggerOnce) {
+            observer.disconnect();
+          }
+        } else if (!triggerOnce) {
           // Se o elemento estiver ACIMA da tela (top < 0), MANTÉM VISÍVEL
           // Se o elemento estiver ABAIXO da tela (top >= 0), OCULTA para re-animar ao rolar para baixo
           if (entry.boundingClientRect.top < 0) {

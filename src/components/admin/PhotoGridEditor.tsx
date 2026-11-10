@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { X, Upload, Loader2, GripVertical, Download } from 'lucide-react';
 import { compressImage } from '@/lib/imageCompression';
-import html2canvas from 'html2canvas';
 
 export interface GridData {
   backgroundColor: string;
@@ -115,6 +114,7 @@ const PhotoGridEditor = ({ data, onChange, onRemove }: PhotoGridEditorProps) => 
     if (!gridRef.current || data.images.length === 0) return;
     setExporting(true);
     try {
+      const { default: html2canvas } = await import('html2canvas');
       const canvas = await html2canvas(gridRef.current, {
         backgroundColor: data.backgroundColor,
         useCORS: true,

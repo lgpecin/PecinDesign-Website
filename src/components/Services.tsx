@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { X, Sparkles, Globe, Box, Eye, Share2, PlusCircle, CheckCircle2 } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useInView } from "@/hooks/use-in-view";
 import { useLanguage } from "@/contexts/LanguageContext";
-import whatsappLogo from "@/assets/whatsapp-logo.png";
+import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 
 // Service sticker assets
 import serviceBranding from "@/assets/redesign/service-branding.png";
@@ -24,14 +24,192 @@ interface ServiceItem {
   title: string;
   subtitle: string;
   src: string;
+  width: number;
+  height: number;
   bgColor: string;
   textColor: string;
   btnBg: string;
   btnText: string;
   description: string;
-  deliverables: string[];
+  deliverables: readonly string[];
   Icon: React.ElementType;
 }
+
+interface ServiceConfig {
+  id: string;
+  titleKey: string;
+  subtitleKey: string;
+  descKey: string;
+  src: string;
+  width: number;
+  height: number;
+  bgColor: string;
+  textColor: string;
+  btnBg: string;
+  btnText: string;
+  deliverablesEn: readonly string[];
+  deliverablesPt: readonly string[];
+  Icon: React.ElementType;
+}
+
+const SERVICES_CONFIG: readonly ServiceConfig[] = [
+  {
+    id: "branding",
+    titleKey: "services.branding_title",
+    subtitleKey: "services.branding_sub",
+    descKey: "services.branding_desc",
+    src: serviceBranding,
+    width: 466,
+    height: 150,
+    bgColor: "#C6F806",
+    textColor: "#064e3b",
+    btnBg: "#18181b",
+    btnText: "#ffffff",
+    deliverablesEn: [
+      "Positioning Diagnosis & Strategy",
+      "Logo, Brand Symbols & Identity System",
+      "Complete Brand Guidelines Manual",
+      "Digital Applications & Brand Collateral",
+    ],
+    deliverablesPt: [
+      "Diagnóstico e Estratégia de Posicionamento",
+      "Logotipo, Símbolos e Identidade Visual",
+      "Manual de Identidade Visual Completo",
+      "Aplicações Digitais e Materiais Institucionais",
+    ],
+    Icon: Sparkles,
+  },
+  {
+    id: "webdesign",
+    titleKey: "services.webdesign_title",
+    subtitleKey: "services.webdesign_sub",
+    descKey: "services.webdesign_desc",
+    src: serviceWebdesign,
+    width: 466,
+    height: 153,
+    bgColor: "#00C090",
+    textColor: "#043828",
+    btnBg: "#18181b",
+    btnText: "#ffffff",
+    deliverablesEn: [
+      "High-Converting Landing Pages",
+      "Corporate Websites & Portfolios",
+      "UI/UX Design for Web and Mobile Apps",
+      "Interactive Prototyping & Full Responsiveness",
+    ],
+    deliverablesPt: [
+      "Landing Pages de Alta Conversão",
+      "Websites Institucionais e Portfólios",
+      "Design de Interfaces (UI/UX para Apps e Web)",
+      "Prototipagem Interativa e Responsividade Total",
+    ],
+    Icon: Globe,
+  },
+  {
+    id: "productdesign",
+    titleKey: "services.productdesign_title",
+    subtitleKey: "services.productdesign_sub",
+    descKey: "services.productdesign_desc",
+    src: serviceProductdesign,
+    width: 466,
+    height: 150,
+    bgColor: "#0C3643",
+    textColor: "#ffffff",
+    btnBg: "#C6F806",
+    btnText: "#0C3643",
+    deliverablesEn: [
+      "Packaging Design, Labels & 3D Mockups",
+      "Information Architecture & Design System",
+      "User Research & Usability Testing",
+      "Physical & Digital Product Prototyping",
+    ],
+    deliverablesPt: [
+      "Design de Embalagens, Rótulos e Mockups 3D",
+      "Arquitetura de Informação e Design System",
+      "Pesquisa de Usuário e Testes de Usabilidade",
+      "Prototipagem de Produtos Físicos e Digitais",
+    ],
+    Icon: Box,
+  },
+  {
+    id: "direcaodearte",
+    titleKey: "services.artdirection_title",
+    subtitleKey: "services.artdirection_sub",
+    descKey: "services.artdirection_desc",
+    src: serviceDirecaodearte,
+    width: 466,
+    height: 150,
+    bgColor: "#00A82D",
+    textColor: "#ffffff",
+    btnBg: "#18181b",
+    btnText: "#ffffff",
+    deliverablesEn: [
+      "Creative Campaign Conceptualization",
+      "Key Visuals & Launch Collateral",
+      "Visual Direction for Photoshoots & Content",
+      "Aesthetic Curation & Visual Standardization",
+    ],
+    deliverablesPt: [
+      "Conceituação Criativa de Campanhas",
+      "Key Visuals e Materiais de Lançamento",
+      "Direção Visual para Ensaios e Conteúdos",
+      "Curadoria Estética e Padronização Visual",
+    ],
+    Icon: Eye,
+  },
+  {
+    id: "socialmedia",
+    titleKey: "services.socialmedia_title",
+    subtitleKey: "services.socialmedia_sub",
+    descKey: "services.socialmedia_desc",
+    src: serviceSocialmedia,
+    width: 466,
+    height: 153,
+    bgColor: "#00C4E2",
+    textColor: "#063d4a",
+    btnBg: "#18181b",
+    btnText: "#ffffff",
+    deliverablesEn: [
+      "Visual Identity for Feeds & Social Profiles",
+      "Strategic Carousels & Static Posts",
+      "Custom Templates & Content Guidelines",
+      "Banners, Thumbnails & Ad Creatives",
+    ],
+    deliverablesPt: [
+      "Identidade Visual para Feeds e Perfis",
+      "Carrosséis Estratégicos e Posts Estáticos",
+      "Templates Editáveis e Diretrizes de Conteúdo",
+      "Banners, Thumbnails e Criativos para Anúncios",
+    ],
+    Icon: Share2,
+  },
+  {
+    id: "emuitomais",
+    titleKey: "services.more_title",
+    subtitleKey: "services.more_sub",
+    descKey: "services.more_desc",
+    src: serviceEmuitomais,
+    width: 466,
+    height: 150,
+    bgColor: "#3D3D3D",
+    textColor: "#ffffff",
+    btnBg: "#C6F806",
+    btnText: "#18181b",
+    deliverablesEn: [
+      "Corporate Presentations & Pitch Decks",
+      "E-book Layouts & Rich Materials",
+      "Brand Activations & Print Collateral",
+      "Creative Consulting & Bespoke Projects",
+    ],
+    deliverablesPt: [
+      "Apresentações Corporativas e Pitch Decks",
+      "Diagramação de E-books e Materiais Ricos",
+      "Ativações de Marca e Materiais Impressos",
+      "Consultoria Criativa e Projetos Especiais",
+    ],
+    Icon: PlusCircle,
+  },
+];
 
 const Services = () => {
   const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
@@ -40,152 +218,31 @@ const Services = () => {
   const { ref, isInView } = useInView({ threshold: 0.1, triggerOnce: false });
 
   const getWhatsAppLink = (serviceTitle: string) => {
-    const message = language === "en" 
+    const message = language === "en"
       ? `Hi Leo! I'd like to talk about ${serviceTitle}.`
       : `Olá Leo! Gostaria de conversar sobre o serviço de ${serviceTitle}.`;
     return `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(message)}`;
   };
 
-  const servicesData: ServiceItem[] = [
-    {
-      id: "branding",
-      title: t("services.branding_title"),
-      subtitle: t("services.branding_sub"),
-      src: serviceBranding,
-      bgColor: "#C6F806",
-      textColor: "#064e3b",
-      btnBg: "#18181b",
-      btnText: "#ffffff",
-      description: t("services.branding_desc"),
-      deliverables: language === "en" ? [
-        "Positioning Diagnosis & Strategy",
-        "Logo, Brand Symbols & Identity System",
-        "Complete Brand Guidelines Manual",
-        "Digital Applications & Brand Collateral",
-      ] : [
-        "Diagnóstico e Estratégia de Posicionamento",
-        "Logotipo, Símbolos e Identidade Visual",
-        "Manual de Identidade Visual Completo",
-        "Aplicações Digitais e Materiais Institucionais",
-      ],
-      Icon: Sparkles,
-    },
-    {
-      id: "webdesign",
-      title: t("services.webdesign_title"),
-      subtitle: t("services.webdesign_sub"),
-      src: serviceWebdesign,
-      bgColor: "#00C090",
-      textColor: "#043828",
-      btnBg: "#18181b",
-      btnText: "#ffffff",
-      description: t("services.webdesign_desc"),
-      deliverables: language === "en" ? [
-        "High-Converting Landing Pages",
-        "Corporate Websites & Portfolios",
-        "UI/UX Design for Web and Mobile Apps",
-        "Interactive Prototyping & Full Responsiveness",
-      ] : [
-        "Landing Pages de Alta Conversão",
-        "Websites Institucionais e Portfólios",
-        "Design de Interfaces (UI/UX para Apps e Web)",
-        "Prototipagem Interativa e Responsividade Total",
-      ],
-      Icon: Globe,
-    },
-    {
-      id: "productdesign",
-      title: t("services.productdesign_title"),
-      subtitle: t("services.productdesign_sub"),
-      src: serviceProductdesign,
-      bgColor: "#0C3643",
-      textColor: "#ffffff",
-      btnBg: "#C6F806",
-      btnText: "#0C3643",
-      description: t("services.productdesign_desc"),
-      deliverables: language === "en" ? [
-        "Packaging Design, Labels & 3D Mockups",
-        "Information Architecture & Design System",
-        "User Research & Usability Testing",
-        "Physical & Digital Product Prototyping",
-      ] : [
-        "Design de Embalagens, Rótulos e Mockups 3D",
-        "Arquitetura de Informação e Design System",
-        "Pesquisa de Usuário e Testes de Usabilidade",
-        "Prototipagem de Produtos Físicos e Digitais",
-      ],
-      Icon: Box,
-    },
-    {
-      id: "direcaodearte",
-      title: t("services.artdirection_title"),
-      subtitle: t("services.artdirection_sub"),
-      src: serviceDirecaodearte,
-      bgColor: "#00A82D",
-      textColor: "#ffffff",
-      btnBg: "#18181b",
-      btnText: "#ffffff",
-      description: t("services.artdirection_desc"),
-      deliverables: language === "en" ? [
-        "Creative Campaign Conceptualization",
-        "Key Visuals & Launch Collateral",
-        "Visual Direction for Photoshoots & Content",
-        "Aesthetic Curation & Visual Standardization",
-      ] : [
-        "Conceituação Criativa de Campanhas",
-        "Key Visuals e Materiais de Lançamento",
-        "Direção Visual para Ensaios e Conteúdos",
-        "Curadoria Estética e Padronização Visual",
-      ],
-      Icon: Eye,
-    },
-    {
-      id: "socialmedia",
-      title: t("services.socialmedia_title"),
-      subtitle: t("services.socialmedia_sub"),
-      src: serviceSocialmedia,
-      bgColor: "#00C4E2",
-      textColor: "#063d4a",
-      btnBg: "#18181b",
-      btnText: "#ffffff",
-      description: t("services.socialmedia_desc"),
-      deliverables: language === "en" ? [
-        "Visual Identity for Feeds & Social Profiles",
-        "Strategic Carousels & Static Posts",
-        "Custom Templates & Content Guidelines",
-        "Banners, Thumbnails & Ad Creatives",
-      ] : [
-        "Identidade Visual para Feeds e Perfis",
-        "Carrosséis Estratégicos e Posts Estáticos",
-        "Templates Editáveis e Diretrizes de Conteúdo",
-        "Banners, Thumbnails e Criativos para Anúncios",
-      ],
-      Icon: Share2,
-    },
-    {
-      id: "emuitomais",
-      title: t("services.more_title"),
-      subtitle: t("services.more_sub"),
-      src: serviceEmuitomais,
-      bgColor: "#3D3D3D",
-      textColor: "#ffffff",
-      btnBg: "#C6F806",
-      btnText: "#18181b",
-      description: t("services.more_desc"),
-      deliverables: language === "en" ? [
-        "Corporate Presentations & Pitch Decks",
-        "E-book Layouts & Rich Materials",
-        "Brand Activations & Print Collateral",
-        "Creative Consulting & Bespoke Projects",
-      ] : [
-        "Apresentações Corporativas e Pitch Decks",
-        "Diagramação de E-books e Materiais Ricos",
-        "Ativações de Marca e Materiais Impressos",
-        "Consultoria Criativa e Projetos Especiais",
-      ],
-      Icon: PlusCircle,
-    },
-  ];
+  const servicesData = useMemo<ServiceItem[]>(
+    () =>
+      SERVICES_CONFIG.map((cfg) => ({
+        id: cfg.id,
+        title: t(cfg.titleKey),
+        subtitle: t(cfg.subtitleKey),
+        src: cfg.src,
+        width: cfg.width,
+        height: cfg.height,
+        bgColor: cfg.bgColor,
+        textColor: cfg.textColor,
+        btnBg: cfg.btnBg,
+        btnText: cfg.btnText,
+        description: t(cfg.descKey),
+        deliverables: language === "en" ? cfg.deliverablesEn : cfg.deliverablesPt,
+        Icon: cfg.Icon,
+      })),
+    [t, language]
+  );
 
   return (
     <section
@@ -202,33 +259,49 @@ const Services = () => {
       <img
         src={dotsVariant1}
         alt=""
+        width={210}
+        height={105}
+        loading="lazy"
+        decoding="async"
         className="dots-decoration top-1 left-1 sm:top-4 sm:left-4 w-20 sm:w-36 md:w-52 lg:w-60 h-auto pointer-events-none opacity-90 z-10 drop-shadow-sm"
         aria-hidden="true"
       />
       <img
         src={dotsVariant2}
         alt=""
+        width={211}
+        height={105}
+        loading="lazy"
+        decoding="async"
         className="dots-decoration top-1 right-1 sm:top-4 sm:right-4 w-20 sm:w-36 md:w-52 lg:w-60 h-auto pointer-events-none opacity-90 z-10 drop-shadow-sm"
         aria-hidden="true"
       />
       <img
         src={dotsVariant3}
         alt=""
+        width={211}
+        height={105}
+        loading="lazy"
+        decoding="async"
         className="dots-decoration bottom-1 left-1 sm:bottom-4 sm:left-4 w-20 sm:w-36 md:w-52 lg:w-60 h-auto pointer-events-none opacity-90 z-10 drop-shadow-sm"
         aria-hidden="true"
       />
       <img
         src={dotsVariant4}
         alt=""
+        width={210}
+        height={105}
+        loading="lazy"
+        decoding="async"
         className="dots-decoration bottom-1 right-1 sm:bottom-4 sm:right-4 w-20 sm:w-36 md:w-52 lg:w-60 h-auto pointer-events-none opacity-90 z-10 drop-shadow-sm"
         aria-hidden="true"
       />
 
       <div className="max-w-5xl mx-auto px-6 sm:px-8 md:px-6 relative z-10">
-        {/* Section Title com animação ao surgir */}
+        {/* Section Title com animação ao surgir (compositor-only opacity + transform) */}
         <div
-          className={`text-center mb-8 sm:mb-14 transition-all duration-700 ${
-            isInView ? "opacity-100 translate-y-0 filter-none" : "opacity-0 translate-y-8 blur-sm"
+          className={`text-center mb-8 sm:mb-14 transition-[opacity,transform] duration-500 ease-out ${
+            isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
           }`}
         >
           <h2 className="font-boldonse text-3xl sm:text-5xl md:text-6xl text-[#064e3b] tracking-tight">
@@ -240,15 +313,19 @@ const Services = () => {
         <div className="relative w-full max-w-[330px] sm:max-w-xl md:max-w-4xl mx-auto min-h-[420px] sm:min-h-[530px] md:min-h-[550px]">
           {/* VISÃO 1: Grid com os 6 blocos */}
           <div
-            className={`w-full grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-6 transition-all duration-300 ${
-              selectedService ? "opacity-0 pointer-events-none" : isInView ? "opacity-100 scale-100 filter-none" : "opacity-0 scale-95 blur-sm"
+            className={`w-full grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-6 transition-[opacity,transform] duration-300 ease-out ${
+              selectedService
+                ? "opacity-0 pointer-events-none"
+                : isInView
+                ? "opacity-100 scale-100"
+                : "opacity-0 scale-[0.97]"
             }`}
           >
             {servicesData.map((service, index) => (
               <div
                 key={service.id}
                 onClick={() => setSelectedService(service)}
-                className="flex items-center justify-center cursor-pointer group transition-all duration-300"
+                className="flex items-center justify-center cursor-pointer group"
                 style={{
                   transitionDelay: `${index * 40}ms`,
                 }}
@@ -256,7 +333,9 @@ const Services = () => {
                 <img
                   src={service.src}
                   alt={`${service.title} - ${service.subtitle}`}
-                  className="w-full h-auto max-w-[300px] sm:max-w-md transition-all duration-300 group-hover:scale-[1.03] group-hover:-translate-y-1 group-hover:drop-shadow-2xl drop-shadow-md active:scale-[0.98]"
+                  width={service.width}
+                  height={service.height}
+                  className="w-full h-auto max-w-[300px] sm:max-w-md transition-transform duration-300 group-hover:scale-[1.03] group-hover:-translate-y-1 drop-shadow-md active:scale-[0.98]"
                   loading="lazy"
                   decoding="async"
                 />
@@ -347,11 +426,7 @@ const Services = () => {
                     color: selectedService.btnText,
                   }}
                 >
-                  <img
-                    src={whatsappLogo}
-                    alt="WhatsApp"
-                    className="w-5 h-5 sm:w-6 sm:h-6 object-contain"
-                  />
+                  <WhatsAppIcon className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
                   {t("hero.cta_whatsapp")}
                 </a>
               </div>
@@ -372,4 +447,4 @@ const Services = () => {
   );
 };
 
-export default Services;
+export default memo(Services);

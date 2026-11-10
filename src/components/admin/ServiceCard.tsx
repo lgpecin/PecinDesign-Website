@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Clock, DollarSign } from "lucide-react";
-import * as Icons from "lucide-react";
+import { getServiceIcon } from "./serviceIcons";
 import { Service } from "./budgets/types";
 
 type ServiceCardProps = {
@@ -11,9 +11,7 @@ type ServiceCardProps = {
 };
 
 const ServiceCard = ({ service, onEdit, onDelete }: ServiceCardProps) => {
-  const IconComponent = service.icon
-    ? (Icons as any)[service.icon] || Icons.Folder
-    : Icons.Folder;
+  const IconComponent = getServiceIcon(service.icon);
 
   return (
     <Card

@@ -1,5 +1,3 @@
-@import 'react-image-crop/dist/ReactCrop.css';
-
 /* ── Custom Font: Boldonse ── */
 @font-face {
   font-family: 'Boldonse';
@@ -142,65 +140,19 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
-  .hover-lift {
-    @apply transition-all duration-300 hover:-translate-y-2;
-  }
-  
-  .fade-in {
-    animation: fadeIn 0.6s ease-out;
-  }
-  
-  /* Performance optimizations */
-  .optimize-rendering {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 500px;
-  }
-  
-  .gpu-accelerated {
-    transform: translateZ(0);
-    will-change: transform;
-  }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
   @keyframes marquee {
     0% {
       transform: translateX(0);
-      -webkit-transform: translateX(0);
     }
     100% {
       transform: translateX(var(--marquee-distance, -33.3333%));
-      -webkit-transform: translateX(var(--marquee-distance, -33.3333%));
     }
   }
 
   .carousel-track {
+    width: max-content;
     animation: marquee linear infinite;
-    -webkit-animation: marquee linear infinite;
     will-change: transform;
-    -webkit-will-change: transform;
-  }
-
-  /* Custom easing tokens (Emil Kowalski's strong curves) */
-  :root {
-    --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
-    --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
-    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-  }
-
-  /* Disable hover-driven transforms on touch devices — they get stuck on tap */
-  @media (hover: none) {
-    .hover-lift:hover { transform: none; }
-    .hover-scale:hover { transform: none; }
   }
 }
 
@@ -220,33 +172,7 @@ All colors MUST be HSL.
   }
 }
 
-
-/* FAQ items: playful hover rotation using per-item CSS var; open state stays straight */
 @media (hover: hover) and (pointer: fine) {
-  .faq-item[data-state="closed"]:hover {
-    transform: scale(1.03) rotate(var(--faq-rot, 0deg));
-  }
-
-  /* Step cards: same playful rotation on hover */
-  .step-card:hover {
-    transform: scale(1.03) rotate(var(--step-rot, 0deg));
-  }
-
-  /* Hero CTA buttons: subtle rotation on hover */
-  .hero-btn:hover {
-    transform: rotate(var(--hero-rot, 0deg));
-  }
-
-  /* About skill cards: rotation on hover */
-  .about-card:hover {
-    transform: scale(1.03) rotate(var(--about-rot, 0deg));
-  }
-
-  /* Filter buttons: rotation on hover */
-  .filter-btn:hover {
-    transform: scale(1.05) rotate(var(--filter-rot, 0deg));
-  }
-
   /* Project cards: ultra smooth hover lift without rotation glitch */
   .project-card {
     -webkit-backface-visibility: hidden;
@@ -413,31 +339,3 @@ All colors MUST be HSL.
 .animate-hero-ribbon-text {
   animation: heroRibbonTextReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
 }
-
-@keyframes heroCarouselReveal {
-  0% {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ── Orçamento Paper (Template Visual - Pecin Design) ── */
-#paper.exporting input {
-  background: transparent !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
-#paper.exporting [data-html2canvas-ignore] {
-  display: none !important;
-}
-
-.animate-hero-carousel {
-  animation: heroCarouselReveal 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
-}
-
-

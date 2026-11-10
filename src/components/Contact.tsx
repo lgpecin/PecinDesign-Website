@@ -1,7 +1,7 @@
 import { MessageSquare, Instagram, Linkedin } from "lucide-react";
-import whatsappLogo from "@/assets/whatsapp-logo.png";
 import stripesDecoration from "@/assets/redesign/stripes-decoration.png";
 import BehanceIcon from "@/components/icons/BehanceIcon";
+import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { AnimatedSection } from "@/components/AnimatedSection";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -18,9 +18,12 @@ const Contact = () => {
         <img
           src={stripesDecoration}
           alt=""
+          width={1440}
+          height={419}
           className="w-full h-full object-cover sm:object-fill opacity-90 select-none"
           aria-hidden="true"
           loading="lazy"
+          decoding="async"
         />
       </div>
 
@@ -49,11 +52,7 @@ const Contact = () => {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3.5 px-8 sm:px-10 py-3.5 sm:py-4 bg-[#008753] hover:bg-[#009e60] text-white rounded-xl sm:rounded-2xl text-base sm:text-lg font-bold shadow-[0_10px_30px_rgba(0,135,83,0.4)] hover:shadow-[0_15px_40px_rgba(0,135,83,0.6)] transition-all duration-300 hover:scale-105 active:scale-95"
             >
-              <img
-                src={whatsappLogo}
-                alt="WhatsApp"
-                className="w-6 h-6 sm:w-7 sm:h-7 object-contain shrink-0"
-              />
+              <WhatsAppIcon className="w-6 h-6 sm:w-7 sm:h-7 text-white shrink-0" />
               <span>{t("contact.cta_whatsapp")}</span>
             </a>
 

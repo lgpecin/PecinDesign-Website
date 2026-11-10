@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   Download,
-  Copy,
   ExternalLink,
   Sun,
   Moon,

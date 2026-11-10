@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -65,10 +65,10 @@
     <link rel="preload" as="image" href="/src/assets/logo.png" fetchpriority="high" />
     
     <!-- Font Loading Otimizado -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800;900&display=swap" />
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800;900&display=swap" rel="stylesheet" />
     </noscript>
     
     <!-- Structured Data - Organization -->
@@ -114,10 +114,6 @@
       "areaServed": "BR"
     }
     </script>
-    <!-- Redesign Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Syne:wght@700;800;900&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
   </head>
 
   <body>
@@ -128,20 +124,5 @@
     
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    
-    <!-- Performance optimization: Start downloading critical resources early -->
-    <script>
-      // Warm up network connections
-      if ('connection' in navigator && navigator.connection) {
-        // @ts-ignore
-        if (navigator.connection.saveData === false) {
-          // Only prefetch on fast connections
-          const prefetchLink = document.createElement('link');
-          prefetchLink.rel = 'prefetch';
-          prefetchLink.href = 'https://snocogcaznxlkaxluwnt.supabase.co';
-          document.head.appendChild(prefetchLink);
-        }
-      }
-    </script>
   </body>
 </html>

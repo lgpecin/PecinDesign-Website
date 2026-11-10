@@ -22,3 +22,22 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# AI skills, assistants and local plans
+.agents/
+.claude/
+.cursor/
+.gemini/
+.lovable/
+
+# Supabase temp, lockfile leftovers and backups
+supabase/.temp/
+bun.lock
+_config.yml
+*.tmp
+*.bak
