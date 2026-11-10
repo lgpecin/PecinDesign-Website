@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+/* Scoped exclusively to Admin & Client Token Pages when mounted */
+body.studio-theme {
+  --background: 60 18% 96%;
+  --foreground: 140 9% 8%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 140 9% 8%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 140 9% 8%;
+
+  --primary: 152 100% 33%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 60 12% 92%;
+  --secondary-foreground: 140 9% 8%;
+
+  --muted: 60 12% 92%;
+  --muted-foreground: 145 5% 40%;
+
+  --accent: 150 48% 94%;
+  --accent-foreground: 152 100% 24%;
+
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 80 8% 89%;
+  --input: 80 8% 86%;
+  --ring: 152 100% 33%;
+
+  --radius: 0.875rem;
+
+  background-color: #111412;
+  color: #111412;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+.studio-shell {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.studio-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.studio-press {
+  transition: transform 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    background-color 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    color 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.studio-press:active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-press {
+    transition: background-color 150ms ease, border-color 150ms ease;
+  }
+  .studio-press:active {
+    transform: none;
+  }
+}
+
+/* Orçamento Paper Export Helpers */
+#paper.exporting input,
+#paper.exporting textarea {
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+#paper.exporting [data-html2canvas-ignore] {
+  display: none !important;
+}

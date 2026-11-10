@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import * as Icons from "lucide-react";
-import type { Service } from "../ServicesSection";
+import type { Service } from "./types";
 
 type Props = {
   clientId: string;

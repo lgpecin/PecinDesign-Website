@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Clock, DollarSign } from "lucide-react";
 import * as Icons from "lucide-react";
-import { Service } from "./ServicesSection";
+import { Service } from "./budgets/types";
 
 type ServiceCardProps = {
   service: Service;

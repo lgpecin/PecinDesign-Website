@@ -10,11 +10,13 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 
-// Lazy load admin and auth pages to reduce initial bundle
+// Lazy load admin, auth and client token pages to keep public bundle lean
 const Auth = lazy(() => import("./pages/Auth"));
 const IndexEN = lazy(() => import("./pages/IndexEN"));
 const Admin = lazy(() => import("./pages/Admin"));
 const ServicesCatalog = lazy(() => import("./pages/ServicesCatalog"));
+const PublicBriefing = lazy(() => import("./pages/PublicBriefing"));
+const PublicBoard = lazy(() => import("./pages/PublicBoard"));
 const Portfolio = lazy(() => import("./pages/Portfolio"));
 const Exit = lazy(() => import("./pages/Exit"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -43,6 +45,8 @@ const AppContent = () => {
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/services/:token" element={<ServicesCatalog />} />
+            <Route path="/briefing/:token" element={<PublicBriefing />} />
+            <Route path="/quadro/:token" element={<PublicBoard />} />
             <Route path="/exit" element={<Exit />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

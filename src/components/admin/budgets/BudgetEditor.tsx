@@ -1,42 +1,39 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   ArrowLeft,
   Plus,
-  Trash2,
-  FileDown,
+  Download,
   Save,
   LibraryBig,
-  GripVertical,
-  Settings2,
+  Eye,
+  EyeOff,
+  FileDown,
+  ArrowUp,
+  ArrowDown,
+  Clock,
+  LayoutGrid,
+  Percent,
 } from "lucide-react";
 import { toast } from "sonner";
+import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import { Checkbox } from "@/components/ui/checkbox";
-import siteLogo from "@/assets/logo.png";
-import HoursPricingHelper from "./HoursPricingHelper";
+import logo from "@/assets/logo.png";
 import { useHourlyRate } from "@/hooks/useHourlyRate";
-import type { BudgetClient, ClientBudget, BudgetItem, ClientService } from "./types";
+import type {
+  BudgetClient,
+  ClientBudget,
+  BudgetItem,
+  ClientService,
+  Service,
+} from "./types";
 
 type Props = {
   client: BudgetClient;
@@ -44,51 +41,101 @@ type Props = {
   onBack: () => void;
 };
 
-const GROUP_COLORS = [
-  { label: "Verde", value: "#84cc16" },
-  { label: "Teal", value: "#14b8a6" },
-  { label: "Rosa", value: "#ec4899" },
-  { label: "Azul", value: "#3b82f6" },
-  { label: "Roxo", value: "#8b5cf6" },
-  { label: "Laranja", value: "#f97316" },
-  { label: "Amarelo", value: "#eab308" },
-];
+export const COLOR_KEYS = ["verde", "lima", "ciano", "roxo", "rosa", "ambar", "branco"] as const;
+export type ColorKey = (typeof COLOR_KEYS)[number];
+
+export const COLOR_VALUES: Record<ColorKey, string> = {
+  verde: "#00e57a",
+  lima: "#c6ff00",
+  ciano: "#35e0ff",
+  roxo: "#b794ff",
+  rosa: "#ff6fb5",
+  ambar: "#ffb938",
+  branco: "#ffffff",
+};
+
+export const getColorHex = (c: string): string => {
+  if (c in COLOR_VALUES) return COLOR_VALUES[c as ColorKey];
+  if (c.startsWith("#")) return c;
+  return "#00e57a";
+};
+
+type EditorRow = {
+  id: string;
+  client_service_id: string | null;
+  color: ColorKey | string;
+  name: string;
+  format: string;
+  prazo: string;
+  hours: number;
+  price: number;
+};
+
+type EditorSection = {
+  id: string;
+  name: string;
+  rows: EditorRow[];
+};
 
 const formatBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+const parseBRL = (val: string): number => {
+  if (!val) return 0;
+  let clean = val.replace(/[^\d,.-]/g, "");
+  if (clean.includes(",")) {
+    clean = clean.replace(/\./g, "").replace(",", ".");
+  }
+  const n = parseFloat(clean);
+  return isNaN(n) ? 0 : n;
+};
+
+const STATUS_OPTIONS = [
+  { value: "draft", label: "Rascunho" },
+  { value: "sent", label: "Enviado" },
+  { value: "approved", label: "Aprovado" },
+  { value: "rejected", label: "Recusado" },
+];
+
 const BudgetEditor = ({ client, budget, onBack }: Props) => {
   const qc = useQueryClient();
-  const [meta, setMeta] = useState({
-    name: budget.name,
-    status: budget.status,
-    start_date: budget.start_date || "",
-    discount_type: (budget.discount_type as "none" | "value" | "percent") || "none",
-    discount_value: Number(budget.discount_value) || 0,
-    notes: budget.notes || "",
-  });
-  const [isTemplateOpen, setIsTemplateOpen] = useState(false);
-  const [isPdfOptionsOpen, setIsPdfOptionsOpen] = useState(false);
+  const paperRef = useRef<HTMLDivElement>(null);
   const { hourlyRate } = useHourlyRate();
 
-  const [pdfOpts, setPdfOpts] = useState({
-    stagesPage: true,
-    investmentPage: true,
-    description: true,
-    quantity: true,
-    hours: false,
-    unitPrice: false,
-    itemSubtotal: true,
-    itemDays: true,
-    totalDays: true,
-    subtotal: true,
-    discount: true,
-    total: true,
-    startDate: true,
-    notes: false,
-  });
+  const [clientName, setClientName] = useState(
+    budget.client_display_name || client.name || ""
+  );
+  const [date, setDate] = useState(
+    budget.start_date
+      ? new Date(budget.start_date + "T12:00:00").toLocaleDateString("pt-BR")
+      : new Date().toLocaleDateString("pt-BR")
+  );
+  const [validade, setValidade] = useState(budget.validity_label || "15 dias");
+  const [projectName, setProjectName] = useState(budget.name || "");
+  const [status, setStatus] = useState(budget.status || "draft");
+  const [shareOnBoard, setShareOnBoard] = useState(Boolean(budget.share_on_board));
+  const [discountType, setDiscountType] = useState<"none" | "percent" | "value">(
+    (budget.discount_type as "none" | "percent" | "value") || "none"
+  );
+  const [discountValue, setDiscountValue] = useState(Number(budget.discount_value) || 0);
+  const [showDiscountControls, setShowDiscountControls] = useState(
+    (Number(budget.discount_value) || 0) > 0
+  );
+  const [notes, setNotes] = useState(
+    budget.notes || "50% na aprovação e 50% na entrega."
+  );
+  const [hideValues, setHideValues] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
-  const { data: items = [], isLoading } = useQuery({
+  // Editing price focus key so input stays raw while typing
+  const [focusedPriceId, setFocusedPriceId] = useState<string | null>(null);
+  const [priceDraft, setPriceDraft] = useState<string>("");
+
+  // Import dialog
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [targetSectionId, setTargetSectionId] = useState<string | null>(null);
+
+  const { data: dbItems = [], isLoading } = useQuery({
     queryKey: ["budget_items", budget.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -115,766 +162,1003 @@ const BudgetEditor = ({ client, budget, onBack }: Props) => {
     },
   });
 
-  const [draft, setDraft] = useState<BudgetItem[]>([]);
-  useEffect(() => setDraft(items), [items]);
+  const { data: globalTemplates = [] } = useQuery({
+    queryKey: ["services"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("services")
+        .select("*")
+        .order("display_order", { ascending: true });
+      if (error) return [];
+      return data as Service[];
+    },
+  });
 
-  const updateItem = (id: string, patch: Partial<BudgetItem>) => {
-    setDraft((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
+  const [sections, setSections] = useState<EditorSection[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    if (isInitialized) return;
+
+    if (dbItems.length > 0) {
+      const groupsMap = new Map<string, EditorRow[]>();
+      dbItems.forEach((item) => {
+        const groupName = item.group_label || "Entregáveis";
+        const rows = groupsMap.get(groupName) || [];
+        rows.push({
+          id: item.id,
+          client_service_id: item.client_service_id,
+          color: (item.group_color as ColorKey) || "verde",
+          name: item.name,
+          format: item.description || "",
+          prazo: item.delivery_days ? `${item.delivery_days} dias` : "",
+          hours: Number(item.hours) || 0,
+          price: Number(item.price) || 0,
+        });
+        groupsMap.set(groupName, rows);
+      });
+
+      const initialSections: EditorSection[] = [];
+      groupsMap.forEach((rows, name) => {
+        initialSections.push({
+          id: `sec-${crypto.randomUUID()}`,
+          name,
+          rows,
+        });
+      });
+      setSections(initialSections);
+      setIsInitialized(true);
+    } else if (!isLoading && dbItems.length === 0) {
+      setSections([
+        {
+          id: "sec-1",
+          name: "Identidade visual",
+          rows: [
+            {
+              id: "row-1",
+              client_service_id: null,
+              color: "verde",
+              name: "Logotipo",
+              format: "Vetor + PNG",
+              prazo: "7 dias",
+              hours: 0,
+              price: 1800,
+            },
+            {
+              id: "row-2",
+              client_service_id: null,
+              color: "lima",
+              name: "Manual de marca",
+              format: "PDF",
+              prazo: "5 dias",
+              hours: 0,
+              price: 900,
+            },
+          ],
+        },
+        {
+          id: "sec-2",
+          name: "Redes sociais",
+          rows: [
+            {
+              id: "row-3",
+              client_service_id: null,
+              color: "ciano",
+              name: "Kit de posts",
+              format: "10 artes · Figma",
+              prazo: "10 dias",
+              hours: 0,
+              price: 1200,
+            },
+          ],
+        },
+      ]);
+      setIsInitialized(true);
+    }
+  }, [dbItems, isLoading, isInitialized]);
+
+  const subtotal = useMemo(() => {
+    return sections.reduce(
+      (acc, sec) =>
+        acc + sec.rows.reduce((rAcc, r) => rAcc + (Number(r.price) || 0), 0),
+      0
+    );
+  }, [sections]);
+
+  const discountAmount = useMemo(() => {
+    if (discountType === "percent") return subtotal * (discountValue / 100);
+    if (discountType === "value") return discountValue;
+    return 0;
+  }, [subtotal, discountType, discountValue]);
+
+  const total = Math.max(0, subtotal - discountAmount);
+
+  const addSection = (name = "Nova sessão") => {
+    setSections((prev) => [
+      ...prev,
+      {
+        id: `sec-${crypto.randomUUID()}`,
+        name,
+        rows: [
+          {
+            id: `tmp-${crypto.randomUUID()}`,
+            client_service_id: null,
+            color: "verde",
+            name: "",
+            format: "",
+            prazo: "",
+            hours: 0,
+            price: 0,
+          },
+        ],
+      },
+    ]);
   };
-  const removeItem = (id: string) => setDraft((prev) => prev.filter((i) => i.id !== id));
 
-  const addEmpty = (groupLabel?: string, groupColor?: string) => {
-    const nextOrder =
-      draft.reduce((m, i) => Math.max(m, i.display_order), 0) + 1;
-    const tmp: BudgetItem = {
-      id: `tmp-${crypto.randomUUID()}`,
-      budget_id: budget.id,
-      client_service_id: null,
-      name: "Novo item",
-      description: "",
-      price: 0,
-      delivery_days: 1,
-      hours: 0,
-      quantity: 1,
-      group_label: groupLabel || null,
-      group_color: groupColor || null,
-      display_order: nextOrder,
-      created_at: new Date().toISOString(),
-    };
-    setDraft((prev) => [...prev, tmp]);
+  const removeSection = (secId: string) => {
+    setSections((prev) => prev.filter((s) => s.id !== secId));
   };
 
-  const addFromService = (svc: ClientService, groupLabel?: string, groupColor?: string) => {
-    const nextOrder = draft.reduce((m, i) => Math.max(m, i.display_order), 0) + 1;
-    const tmp: BudgetItem = {
+  const moveSection = (secIndex: number, direction: "up" | "down") => {
+    setSections((prev) => {
+      const next = [...prev];
+      const targetIndex = direction === "up" ? secIndex - 1 : secIndex + 1;
+      if (targetIndex < 0 || targetIndex >= next.length) return prev;
+      const [moved] = next.splice(secIndex, 1);
+      next.splice(targetIndex, 0, moved);
+      return next;
+    });
+  };
+
+  const updateSectionName = (secId: string, name: string) => {
+    setSections((prev) =>
+      prev.map((s) => (s.id === secId ? { ...s, name } : s))
+    );
+  };
+
+  const addRow = (secId: string, color: ColorKey = "verde") => {
+    setSections((prev) =>
+      prev.map((s) => {
+        if (s.id !== secId) return s;
+        const lastColor =
+          s.rows.length > 0 ? s.rows[s.rows.length - 1].color : color;
+        return {
+          ...s,
+          rows: [
+            ...s.rows,
+            {
+              id: `tmp-${crypto.randomUUID()}`,
+              client_service_id: null,
+              color: lastColor,
+              name: "",
+              format: "",
+              prazo: "",
+              hours: 0,
+              price: 0,
+            },
+          ],
+        };
+      })
+    );
+  };
+
+  const removeRow = (secId: string, rowId: string) => {
+    setSections((prev) =>
+      prev.map((s) => {
+        if (s.id !== secId) return s;
+        return { ...s, rows: s.rows.filter((r) => r.id !== rowId) };
+      })
+    );
+  };
+
+  const moveRow = (secId: string, rowIndex: number, direction: "up" | "down") => {
+    setSections((prev) =>
+      prev.map((s) => {
+        if (s.id !== secId) return s;
+        const nextRows = [...s.rows];
+        const targetIndex = direction === "up" ? rowIndex - 1 : rowIndex + 1;
+        if (targetIndex < 0 || targetIndex >= nextRows.length) return s;
+        const [moved] = nextRows.splice(rowIndex, 1);
+        nextRows.splice(targetIndex, 0, moved);
+        return { ...s, rows: nextRows };
+      })
+    );
+  };
+
+  const updateRow = (
+    secId: string,
+    rowId: string,
+    patch: Partial<EditorRow>
+  ) => {
+    setSections((prev) =>
+      prev.map((s) => {
+        if (s.id !== secId) return s;
+        return {
+          ...s,
+          rows: s.rows.map((r) => (r.id === rowId ? { ...r, ...patch } : r)),
+        };
+      })
+    );
+  };
+
+  const importService = (
+    svc: { id: string; name: string; description: string | null; price: number; delivery_days: number; hours?: number; color: string | null },
+    isClientService: boolean,
+    targetSecId?: string
+  ) => {
+    const newRow: EditorRow = {
       id: `tmp-${crypto.randomUUID()}`,
-      budget_id: budget.id,
-      client_service_id: svc.id,
+      client_service_id: isClientService ? svc.id : null,
+      color: (svc.color as ColorKey) || "verde",
       name: svc.name,
-      description: svc.description || "",
-      price: svc.price,
-      delivery_days: svc.delivery_days,
-      hours: svc.hours || 0,
-      quantity: 1,
-      group_label: groupLabel || null,
-      group_color: groupColor || svc.color || null,
-      display_order: nextOrder,
-      created_at: new Date().toISOString(),
+      format: svc.description || "",
+      prazo: svc.delivery_days ? `${svc.delivery_days} dias` : "",
+      hours: Number(svc.hours) || 0,
+      price: Number(svc.price) || 0,
     };
-    setDraft((prev) => [...prev, tmp]);
+
+    setSections((prev) => {
+      const targetId = targetSecId || prev[0]?.id;
+      if (!targetId) {
+        return [
+          {
+            id: `sec-${crypto.randomUUID()}`,
+            name: "Serviços",
+            rows: [newRow],
+          },
+        ];
+      }
+      return prev.map((s) =>
+        s.id === targetId ? { ...s, rows: [...s.rows, newRow] } : s
+      );
+    });
+
+    setIsImportOpen(false);
+    toast.success(`"${svc.name}" adicionado`);
   };
 
-  const save = useMutation({
+  // Parse dd/mm/yyyy to yyyy-mm-dd for Postgres DATE column safely
+  const parseDisplayDateToIso = (d: string): string | null => {
+    const m = d.trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d.trim())) return d.trim();
+    return null;
+  };
+
+  const saveMutation = useMutation({
     mutationFn: async () => {
-      const { error: mErr } = await supabase
+      const baseUpdate: Record<string, any> = {
+        name: projectName.trim() || "Orçamento",
+        status,
+        start_date: parseDisplayDateToIso(date),
+        discount_type: discountType,
+        discount_value: discountValue,
+        notes,
+        validity_label: validade,
+        client_display_name: clientName,
+        share_on_board: shareOnBoard,
+      };
+
+      const { error: bErr } = await supabase
         .from("client_budgets")
-        .update({
-          name: meta.name,
-          status: meta.status,
-          start_date: meta.start_date || null,
-          discount_type: meta.discount_type,
-          discount_value: meta.discount_value,
-          notes: meta.notes,
-        })
+        .update(baseUpdate as any)
         .eq("id", budget.id);
-      if (mErr) throw mErr;
 
-      // Delete removed
-      const existingIds = items.map((i) => i.id);
-      const draftIds = draft.filter((d) => !d.id.startsWith("tmp-")).map((d) => d.id);
-      const toDelete = existingIds.filter((id) => !draftIds.includes(id));
-      if (toDelete.length) {
-        const { error } = await supabase.from("budget_items").delete().in("id", toDelete);
-        if (error) throw error;
+      // Graceful fallback if new columns aren't migrated yet
+      if (bErr && bErr.message?.toLowerCase().includes("column")) {
+        const { error: fallbackErr } = await supabase
+          .from("client_budgets")
+          .update({
+            name: projectName.trim() || "Orçamento",
+            status,
+            start_date: parseDisplayDateToIso(date),
+            discount_type: discountType,
+            discount_value: discountValue,
+            notes,
+          })
+          .eq("id", budget.id);
+        if (fallbackErr) throw fallbackErr;
+      } else if (bErr) {
+        throw bErr;
       }
 
-      // Upsert
-      const toInsert = draft
-        .filter((d) => d.id.startsWith("tmp-"))
-        .map((d, idx) => ({
+      const allRows: { row: EditorRow; secName: string; order: number }[] = [];
+      let globalIdx = 0;
+      sections.forEach((sec) => {
+        sec.rows.forEach((r) => {
+          allRows.push({
+            row: r,
+            secName: sec.name,
+            order: globalIdx++,
+          });
+        });
+      });
+
+      const existingIds = dbItems.map((i) => i.id);
+      const currentDbIds = allRows
+        .filter(({ row }) => !row.id.startsWith("tmp-") && !row.id.startsWith("row-"))
+        .map(({ row }) => row.id);
+      const toDelete = existingIds.filter((id) => !currentDbIds.includes(id));
+
+      if (toDelete.length > 0) {
+        const { error: dErr } = await supabase
+          .from("budget_items")
+          .delete()
+          .in("id", toDelete);
+        if (dErr) throw dErr;
+      }
+
+      const toInsert = allRows
+        .filter(({ row }) => row.id.startsWith("tmp-") || row.id.startsWith("row-"))
+        .map(({ row, secName, order }) => ({
           budget_id: budget.id,
-          client_service_id: d.client_service_id,
-          name: d.name,
-          description: d.description,
-          price: d.price,
-          delivery_days: d.delivery_days,
-          hours: d.hours || 0,
-          quantity: d.quantity,
-          group_label: d.group_label,
-          group_color: d.group_color,
-          display_order: d.display_order || idx,
+          client_service_id: row.client_service_id,
+          name: row.name || "Item",
+          description: row.format,
+          price: row.price,
+          delivery_days: parseInt(row.prazo.replace(/\D/g, "")) || 0,
+          hours: row.hours || 0,
+          quantity: 1,
+          group_label: secName,
+          group_color: row.color,
+          display_order: order,
         }));
-      if (toInsert.length) {
-        const { error } = await supabase.from("budget_items").insert(toInsert);
-        if (error) throw error;
+
+      if (toInsert.length > 0) {
+        const { error: iErr } = await supabase.from("budget_items").insert(toInsert);
+        if (iErr) throw iErr;
       }
 
-      const toUpdate = draft.filter((d) => !d.id.startsWith("tmp-"));
-      for (const d of toUpdate) {
-        const { error } = await supabase
+      const toUpdate = allRows.filter(
+        ({ row }) => !row.id.startsWith("tmp-") && !row.id.startsWith("row-")
+      );
+
+      for (const { row, secName, order } of toUpdate) {
+        const { error: uErr } = await supabase
           .from("budget_items")
           .update({
-            name: d.name,
-            description: d.description,
-            price: d.price,
-            delivery_days: d.delivery_days,
-            hours: d.hours || 0,
-            quantity: d.quantity,
-            group_label: d.group_label,
-            group_color: d.group_color,
-            display_order: d.display_order,
+            name: row.name,
+            description: row.format,
+            price: row.price,
+            delivery_days: parseInt(row.prazo.replace(/\D/g, "")) || 0,
+            hours: row.hours || 0,
+            group_label: secName,
+            group_color: row.color,
+            display_order: order,
           })
-          .eq("id", d.id);
-        if (error) throw error;
+          .eq("id", row.id);
+        if (uErr) throw uErr;
       }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["budget_items", budget.id] });
       qc.invalidateQueries({ queryKey: ["client_budgets", client.id] });
+      qc.invalidateQueries({ queryKey: ["client_shared_budgets", client.id] });
+      qc.invalidateQueries({ queryKey: ["admin-home-stats"] });
       toast.success("Orçamento salvo");
     },
-    onError: (e: any) => toast.error(e?.message || "Erro ao salvar"),
+    onError: (err: any) => toast.error(err?.message || "Erro ao salvar"),
   });
 
-  // Grouping
-  const groups = useMemo(() => {
-    const map = new Map<string, { label: string; color: string; items: BudgetItem[] }>();
-    draft.forEach((it) => {
-      const key = it.group_label || "__none__";
-      if (!map.has(key)) {
-        map.set(key, {
-          label: it.group_label || "Sem grupo",
-          color: it.group_color || "#84cc16",
-          items: [],
-        });
-      }
-      map.get(key)!.items.push(it);
-    });
-    return Array.from(map.values());
-  }, [draft]);
-
-  const subtotal = draft.reduce((s, i) => s + i.price * i.quantity, 0);
-  const discount =
-    meta.discount_type === "percent"
-      ? (subtotal * Math.max(0, Math.min(100, meta.discount_value))) / 100
-      : meta.discount_type === "value"
-      ? Math.max(0, meta.discount_value)
-      : 0;
-  const total = Math.max(0, subtotal - discount);
-  const totalDays = draft.reduce((s, i) => s + i.delivery_days, 0);
-
-  // ============ PDF EXPORT ============
-  const loadLogoDataUrl = async (): Promise<{ url: string; w: number; h: number } | null> => {
+  const exportPNG = async () => {
+    if (!paperRef.current) return;
+    setIsExporting(true);
     try {
-      const res = await fetch(siteLogo);
-      const blob = await res.blob();
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const fr = new FileReader();
-        fr.onload = () => resolve(fr.result as string);
-        fr.onerror = reject;
-        fr.readAsDataURL(blob);
+      await new Promise((r) => setTimeout(r, 50));
+      await document.fonts.ready;
+      const canvas = await html2canvas(paperRef.current, {
+        scale: 2,
+        backgroundColor: null,
+        useCORS: true,
+        logging: false,
       });
-      const dims = await new Promise<{ w: number; h: number }>((resolve) => {
-        const img = new Image();
-        img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
-        img.onerror = () => resolve({ w: 0, h: 0 });
-        img.src = dataUrl;
-      });
-      return { url: dataUrl, w: dims.w, h: dims.h };
-    } catch {
-      return null;
+      const a = document.createElement("a");
+      const cleanName =
+        projectName.toLowerCase().replace(/[^a-z0-9]/g, "-") || "orcamento";
+      a.download = `orcamento-${cleanName}.png`;
+      a.href = canvas.toDataURL("image/png");
+      a.click();
+      toast.success("PNG baixado");
+    } catch (e) {
+      console.error(e);
+      toast.error("Erro ao gerar PNG");
+    } finally {
+      setIsExporting(false);
     }
   };
 
   const exportPDF = async () => {
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
-    const pageW = doc.internal.pageSize.getWidth();
-    const pageH = doc.internal.pageSize.getHeight();
-    const BAND_W = 56;
-    const BAND_COLOR: [number, number, number] = [132, 204, 22];
-    const TEXT_DARK: [number, number, number] = [15, 15, 15];
-    const PRICE_GREEN: [number, number, number] = [22, 101, 52];
-    const MUTED: [number, number, number] = [110, 110, 110];
-
-    const logo = await loadLogoDataUrl();
-
-    const drawHeader = () => {
-      doc.setFillColor(...BAND_COLOR);
-      doc.rect(0, 0, BAND_W, pageH, "F");
-      if (logo && logo.w && logo.h) {
-        const targetH = 48;
-        const targetW = (logo.w / logo.h) * targetH;
-        doc.addImage(logo.url, "PNG", BAND_W + 40, 32, targetW, targetH);
-      } else {
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(18);
-        doc.setTextColor(...TEXT_DARK);
-        doc.text("Pecin Design", BAND_W + 40, 60);
-      }
-    };
-
-    const cx = BAND_W + 40;
-    const rightX = pageW - 40;
-    let y = 170;
-
-    // ============ PAGE 1: Etapas & Prazos ============
-    if (pdfOpts.stagesPage) {
-      drawHeader();
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(34);
-      doc.setTextColor(...TEXT_DARK);
-      doc.text("Etapas", cx, y);
-      y += 36;
-      doc.text("& Prazos.", cx, y);
-      y += 50;
-
-      let groupIdx = 0;
-      groups.forEach((g) => {
-        groupIdx++;
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(13);
-        doc.setTextColor(...TEXT_DARK);
-        doc.text(`${groupIdx} - ${g.label}`, cx, y);
-        y += 18;
-
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(11);
-        g.items.forEach((it, idx) => {
-          if (y > pageH - 140) {
-            doc.addPage();
-            drawHeader();
-            y = 80;
-          }
-          doc.setTextColor(...TEXT_DARK);
-          doc.text(`${groupIdx}.${idx + 1} - ${it.name}`, cx, y);
-          if (pdfOpts.itemDays) {
-            const days = `${it.delivery_days} ${it.delivery_days === 1 ? "dia útil" : "dias úteis"}`;
-            doc.text(days, rightX, y, { align: "right" });
-          }
-          y += 16;
-        });
-        y += 14;
+    if (!paperRef.current) return;
+    setIsExporting(true);
+    try {
+      await new Promise((r) => setTimeout(r, 50));
+      await document.fonts.ready;
+      const canvas = await html2canvas(paperRef.current, {
+        scale: 2,
+        backgroundColor: null,
+        useCORS: true,
+        logging: false,
       });
-
-      const footY = pageH - 110;
-      if (pdfOpts.totalDays) {
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(13);
-        doc.setTextColor(...TEXT_DARK);
-        doc.text("Prazo total", cx, footY);
-        doc.text(`${totalDays} ${totalDays === 1 ? "dia útil" : "dias úteis"}`, rightX, footY, {
-          align: "right",
-        });
-      }
-      if (pdfOpts.startDate) {
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(13);
-        doc.setTextColor(...TEXT_DARK);
-        doc.text("Disponibilidade para início", cx, footY + 20);
-        const startStr = meta.start_date
-          ? new Date(meta.start_date + "T00:00:00").toLocaleDateString("pt-BR")
-          : "—";
-        doc.text(startStr, rightX, footY + 20, { align: "right" });
-      }
-
-      doc.setDrawColor(...TEXT_DARK);
-      doc.setLineWidth(0.8);
-      doc.line(pageW / 2 - 50, pageH - 50, pageW / 2 + 50, pageH - 50);
-    }
-
-    // ============ PAGE 2: Investimento ============
-    if (pdfOpts.investmentPage) {
-      if (pdfOpts.stagesPage) doc.addPage();
-      drawHeader();
-
-      const bandW = 28;
-      const bandX = BAND_W;
-
-      y = 170;
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(34);
-      doc.setTextColor(...TEXT_DARK);
-      doc.text("Investimento.", cx, y);
-      y += 50;
-
-      let groupIdx = 0;
-      groups.forEach((g) => {
-        groupIdx++;
-        const groupStartY = y - 14;
-        const r = parseInt((g.color || "#84cc16").slice(1, 3), 16);
-        const gg = parseInt((g.color || "#84cc16").slice(3, 5), 16);
-        const bb = parseInt((g.color || "#84cc16").slice(5, 7), 16);
-
-        const itemsBlockHeight = g.items.reduce((h, it) => {
-          const descLines = pdfOpts.description && it.description
-            ? doc.splitTextToSize(it.description, pageW - cx - 60).length
-            : 0;
-          return h + 22 + 16 + descLines * 13 + 14;
-        }, 0);
-
-        doc.setFillColor(r, gg, bb);
-        doc.rect(bandX, groupStartY, bandW, itemsBlockHeight + 10, "F");
-        doc.setTextColor(255, 255, 255);
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(12);
-        doc.text(g.label, bandX + bandW / 2 + 4, groupStartY + itemsBlockHeight / 2 + 20, { angle: 90 });
-
-        g.items.forEach((it, idx) => {
-          if (y > pageH - 120) {
-            doc.addPage();
-            drawHeader();
-            y = 80;
-          }
-          const num = String(idx + 1).padStart(2, "0");
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(18);
-          doc.setTextColor(...TEXT_DARK);
-          let titleText = `${num}. ${it.name}`;
-          if (pdfOpts.quantity && it.quantity > 1) titleText += ` ×${it.quantity}`;
-          titleText += ":";
-          doc.text(titleText, cx, y);
-          const titleW = doc.getTextWidth(titleText);
-
-          if (pdfOpts.itemSubtotal || pdfOpts.unitPrice) {
-            doc.setTextColor(...PRICE_GREEN);
-            const priceText = pdfOpts.itemSubtotal
-              ? ` ${formatBRL(it.price * it.quantity)}`
-              : ` ${formatBRL(it.price)}`;
-            doc.text(priceText, cx + titleW + 2, y);
-          }
-          y += 18;
-
-          doc.setFont("helvetica", "normal");
-          doc.setFontSize(10);
-          doc.setTextColor(...TEXT_DARK);
-          if (pdfOpts.description && it.description) {
-            const lines = doc.splitTextToSize(it.description, pageW - cx - 60);
-            lines.forEach((line: string) => {
-              doc.text(line, cx, y);
-              y += 13;
-            });
-          }
-          if (pdfOpts.hours && it.hours > 0) {
-            doc.setTextColor(...MUTED);
-            doc.text(`${it.hours}h estimadas`, cx, y);
-            y += 13;
-          }
-          y += 12;
-        });
-        y += 4;
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: canvas.width > canvas.height ? "landscape" : "portrait",
+        unit: "px",
+        format: [canvas.width, canvas.height],
       });
-
-      if (y > pageH - 140) {
-        doc.addPage();
-        drawHeader();
-        y = 100;
-      }
-      y += 10;
-      doc.setDrawColor(200);
-      doc.line(cx, y, rightX, y);
-      y += 22;
-
-      if (pdfOpts.subtotal) {
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(11);
-        doc.setTextColor(...MUTED);
-        doc.text("Subtotal", cx, y);
-        doc.setTextColor(...TEXT_DARK);
-        doc.text(formatBRL(subtotal), rightX, y, { align: "right" });
-        y += 16;
-      }
-      if (pdfOpts.discount && discount > 0) {
-        doc.setTextColor(...MUTED);
-        const dLabel =
-          meta.discount_type === "percent"
-            ? `Desconto (${meta.discount_value}%)`
-            : "Desconto";
-        doc.text(dLabel, cx, y);
-        doc.setTextColor(200, 50, 50);
-        doc.text(`- ${formatBRL(discount)}`, rightX, y, { align: "right" });
-        y += 16;
-      }
-      if (pdfOpts.total) {
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(16);
-        doc.setTextColor(...TEXT_DARK);
-        doc.text("Total", cx, y + 10);
-        doc.setTextColor(...PRICE_GREEN);
-        doc.text(formatBRL(total), rightX, y + 10, { align: "right" });
-        y += 30;
-      }
-
-      if (pdfOpts.notes && meta.notes) {
-        y += 14;
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(11);
-        doc.setTextColor(...TEXT_DARK);
-        doc.text("Observações", cx, y);
-        y += 14;
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
-        const lines = doc.splitTextToSize(meta.notes, pageW - cx - 60);
-        lines.forEach((line: string) => {
-          doc.text(line, cx, y);
-          y += 12;
-        });
-      }
-
-      doc.setDrawColor(...TEXT_DARK);
-      doc.setLineWidth(0.8);
-      doc.line(pageW / 2 - 50, pageH - 50, pageW / 2 + 50, pageH - 50);
+      pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+      const cleanName =
+        projectName.toLowerCase().replace(/[^a-z0-9]/g, "-") || "orcamento";
+      pdf.save(`orcamento-${cleanName}.pdf`);
+      toast.success("PDF baixado");
+    } catch (e) {
+      console.error(e);
+      toast.error("Erro ao gerar PDF");
+    } finally {
+      setIsExporting(false);
     }
-
-    doc.save(`${meta.name || "orcamento"}-${client.name}.pdf`);
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={onBack}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <Input
-              value={meta.name}
-              onChange={(e) => setMeta({ ...meta, name: e.target.value })}
-              className="text-xl font-bold border-0 px-0 h-auto focus-visible:ring-0"
-            />
-            <p className="text-xs text-muted-foreground">{client.name}</p>
-          </div>
+    <div className="space-y-5 pb-14">
+      {/* Studio Action Bar */}
+      <div className="bg-white border border-[#E5E7E2] rounded-2xl p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3 sticky top-3 z-30 shadow-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={onBack}
+            className="studio-press inline-flex items-center gap-1.5 text-xs font-semibold text-[#111412] bg-[#F6F6F2] hover:bg-[#EBECE6] border border-[#E5E7E2] rounded-full px-3.5 py-2 cursor-pointer"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Voltar
+          </button>
+
+          <button
+            type="button"
+            onClick={() => addSection()}
+            className="studio-press inline-flex items-center gap-1.5 text-xs font-semibold text-[#111412] bg-[#F6F6F2] hover:bg-[#EBECE6] border border-[#E5E7E2] rounded-full px-3.5 py-2 cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5 text-[#00A859]" />
+            Sessão
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setTargetSectionId(null);
+              setIsImportOpen(true);
+            }}
+            className="studio-press inline-flex items-center gap-1.5 text-xs font-semibold text-[#111412] bg-[#F6F6F2] hover:bg-[#EBECE6] border border-[#E5E7E2] rounded-full px-3.5 py-2 cursor-pointer"
+          >
+            <LibraryBig className="w-3.5 h-3.5" />
+            Catálogo
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setHideValues((p) => !p)}
+            className={`studio-press inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3.5 py-2 cursor-pointer border ${
+              hideValues
+                ? "bg-[#111412] text-white border-[#111412]"
+                : "bg-[#F6F6F2] text-[#111412] border-[#E5E7E2] hover:bg-[#EBECE6]"
+            }`}
+          >
+            {hideValues ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+            {hideValues ? "Mostrar valores" : "Ocultar valores"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowDiscountControls((p) => !p)}
+            className={`studio-press inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3.5 py-2 cursor-pointer border ${
+              showDiscountControls || discountValue > 0
+                ? "bg-[#F1F8D0] text-[#1F2E05] border-[#DCE89D]"
+                : "bg-[#F6F6F2] text-[#5E6862] border-[#E5E7E2] hover:text-[#111412]"
+            }`}
+          >
+            <Percent className="w-3.5 h-3.5" />
+            Desconto
+          </button>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={() => setIsPdfOptionsOpen(true)} title="Opções do PDF">
-            <Settings2 className="w-4 h-4" />
-          </Button>
-          <Button variant="outline" onClick={exportPDF} disabled={draft.length === 0}>
-            <FileDown className="w-4 h-4 mr-1" />
-            Exportar PDF
-          </Button>
-          <Button onClick={() => save.mutate()} disabled={save.isPending}>
-            <Save className="w-4 h-4 mr-1" />
-            Salvar
-          </Button>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="rounded-full bg-[#F6F6F2] border border-[#E5E7E2] px-3 py-1.5 text-xs font-semibold text-[#111412] outline-none cursor-pointer"
+          >
+            {STATUS_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+
+          <button
+            type="button"
+            onClick={() => setShareOnBoard((v) => !v)}
+            className={`studio-press inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3.5 py-2 cursor-pointer border ${
+              shareOnBoard
+                ? "bg-[#E6F7EE] text-[#053825] border-[#BBE7CF]"
+                : "bg-[#F6F6F2] text-[#5E6862] border-[#E5E7E2]"
+            }`}
+            title="Publicar este orçamento no Quadro do cliente"
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            {shareOnBoard ? "No Quadro" : "Oculto do Quadro"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => saveMutation.mutate()}
+            disabled={saveMutation.isPending}
+            className="studio-press inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-[#111412] hover:bg-[#232925] rounded-full px-4 py-2 cursor-pointer disabled:opacity-50"
+          >
+            <Save className="w-3.5 h-3.5 text-[#CCFF00]" />
+            {saveMutation.isPending ? "Salvando..." : "Salvar"}
+          </button>
+
+          <button
+            type="button"
+            onClick={exportPNG}
+            disabled={isExporting}
+            className="studio-press inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-[#00A859] hover:bg-[#00924E] rounded-full px-4 py-2 cursor-pointer disabled:opacity-50"
+          >
+            <Download className="w-3.5 h-3.5" />
+            PNG
+          </button>
+
+          <button
+            type="button"
+            onClick={exportPDF}
+            disabled={isExporting}
+            className="studio-press inline-flex items-center gap-1.5 text-xs font-semibold text-[#111412] bg-[#F6F6F2] hover:bg-[#EBECE6] border border-[#E5E7E2] rounded-full px-3.5 py-2 cursor-pointer disabled:opacity-50"
+          >
+            <FileDown className="w-3.5 h-3.5" />
+            PDF
+          </button>
         </div>
       </div>
 
-      {/* Meta */}
-      <Card className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <Label>Status</Label>
-          <Select value={meta.status} onValueChange={(v) => setMeta({ ...meta, status: v })}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="draft">Rascunho</SelectItem>
-              <SelectItem value="sent">Enviado</SelectItem>
-              <SelectItem value="approved">Aprovado</SelectItem>
-              <SelectItem value="rejected">Recusado</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label>Disponibilidade para início</Label>
-          <Input
-            type="date"
-            value={meta.start_date}
-            onChange={(e) => setMeta({ ...meta, start_date: e.target.value })}
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <Label>Desconto</Label>
-            <Select
-              value={meta.discount_type}
-              onValueChange={(v: any) => setMeta({ ...meta, discount_type: v })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Nenhum</SelectItem>
-                <SelectItem value="value">R$ valor</SelectItem>
-                <SelectItem value="percent">% percentual</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>&nbsp;</Label>
-            <Input
+      {/* Discount Controls Row (Internal) */}
+      {showDiscountControls && (
+        <div className="bg-white border border-[#E5E7E2] rounded-2xl p-4 flex flex-wrap items-center gap-4 max-w-[900px] mx-auto">
+          <span className="text-xs font-semibold text-[#111412]">Desconto opcional:</span>
+          <select
+            value={discountType}
+            onChange={(e) => setDiscountType(e.target.value as any)}
+            className="rounded-xl bg-[#FAFAF7] border border-[#E5E7E2] px-3 py-1.5 text-xs outline-none"
+          >
+            <option value="none">Sem desconto</option>
+            <option value="percent">Porcentagem (%)</option>
+            <option value="value">Valor fixo (R$)</option>
+          </select>
+          {discountType !== "none" && (
+            <input
               type="number"
               min={0}
               step="0.01"
-              disabled={meta.discount_type === "none"}
-              value={meta.discount_value}
-              onChange={(e) =>
-                setMeta({ ...meta, discount_value: parseFloat(e.target.value) || 0 })
-              }
+              value={discountValue}
+              onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)}
+              className="w-28 rounded-xl bg-[#FAFAF7] border border-[#E5E7E2] px-3 py-1.5 text-xs studio-nums outline-none"
             />
-          </div>
-        </div>
-      </Card>
-
-      {/* Items */}
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Itens do orçamento</h3>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsTemplateOpen(true)}
-            disabled={clientServices.length === 0}
-          >
-            <LibraryBig className="w-4 h-4 mr-1" />
-            Adicionar do serviço
-          </Button>
-          <Button size="sm" onClick={() => addEmpty()}>
-            <Plus className="w-4 h-4 mr-1" />
-            Bloco vazio
-          </Button>
-        </div>
-      </div>
-
-      {isLoading ? (
-        <div className="text-center text-muted-foreground py-6">Carregando...</div>
-      ) : draft.length === 0 ? (
-        <Card className="p-8 text-center border-dashed text-muted-foreground">
-          Adicione blocos com os serviços deste orçamento.
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {draft.map((it) => (
-            <Card key={it.id} className="p-4 border-l-4" style={{ borderLeftColor: it.group_color || "#cbd5e1" }}>
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start">
-                <div className="md:col-span-4">
-                  <Label className="text-xs">Nome do item</Label>
-                  <Input
-                    value={it.name}
-                    onChange={(e) => updateItem(it.id, { name: e.target.value })}
-                  />
-                </div>
-                <div className="md:col-span-3">
-                  <Label className="text-xs">Grupo (ex: Have Fun)</Label>
-                  <Input
-                    value={it.group_label || ""}
-                    placeholder="Sem grupo"
-                    onChange={(e) =>
-                      updateItem(it.id, { group_label: e.target.value || null })
-                    }
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <Label className="text-xs">Cor do grupo</Label>
-                  <Select
-                    value={it.group_color || "#84cc16"}
-                    onValueChange={(v) => updateItem(it.id, { group_color: v })}
-                  >
-                    <SelectTrigger>
-                      <div
-                        className="w-4 h-4 rounded mr-1 inline-block"
-                        style={{ backgroundColor: it.group_color || "#84cc16" }}
-                      />
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {GROUP_COLORS.map((c) => (
-                        <SelectItem key={c.value} value={c.value}>
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="w-3 h-3 rounded"
-                              style={{ backgroundColor: c.value }}
-                            />
-                            {c.label}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="md:col-span-1">
-                  <Label className="text-xs">Qtd</Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={it.quantity}
-                    onChange={(e) =>
-                      updateItem(it.id, { quantity: parseInt(e.target.value) || 1 })
-                    }
-                  />
-                </div>
-                <div className="md:col-span-1">
-                  <Label className="text-xs">Dias</Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={it.delivery_days}
-                    onChange={(e) =>
-                      updateItem(it.id, { delivery_days: parseInt(e.target.value) || 0 })
-                    }
-                  />
-                </div>
-                <div className="md:col-span-1">
-                  <Label className="text-xs">Horas</Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    step="0.5"
-                    value={it.hours || 0}
-                    onChange={(e) =>
-                      updateItem(it.id, { hours: parseFloat(e.target.value) || 0 })
-                    }
-                  />
-                </div>
-                <div className="md:col-span-1">
-                  <Label className="text-xs flex items-center justify-between">
-                    Preço
-                    {hourlyRate > 0 && (it.hours || 0) > 0 && (
-                      <button
-                        type="button"
-                        className="text-[10px] text-primary hover:underline"
-                        title={`Sugestão: ${formatBRL((it.hours || 0) * hourlyRate)}`}
-                        onClick={() =>
-                          updateItem(it.id, { price: (it.hours || 0) * hourlyRate })
-                        }
-                      >
-                        ✨
-                      </button>
-                    )}
-                  </Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    value={it.price}
-                    onChange={(e) =>
-                      updateItem(it.id, { price: parseFloat(e.target.value) || 0 })
-                    }
-                  />
-                </div>
-                <div className="md:col-span-12">
-                  <Label className="text-xs">Descrição (aparece no PDF)</Label>
-                  <Textarea
-                    rows={2}
-                    value={it.description || ""}
-                    onChange={(e) => updateItem(it.id, { description: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-sm text-muted-foreground">
-                  Subtotal: <strong className="text-primary">{formatBRL(it.price * it.quantity)}</strong>
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeItem(it.id)}
-                  className="hover:bg-destructive/10 hover:text-destructive"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </Card>
-          ))}
+          )}
         </div>
       )}
 
-      {/* Totals */}
-      <Card className="p-5 bg-muted/30 space-y-2 text-sm">
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">Subtotal</span>
-          <span>{formatBRL(subtotal)}</span>
-        </div>
-        {discount > 0 && (
-          <div className="flex justify-between text-destructive">
-            <span>
-              Desconto{" "}
-              {meta.discount_type === "percent" ? `(${meta.discount_value}%)` : ""}
-            </span>
-            <span>- {formatBRL(discount)}</span>
-          </div>
-        )}
-        <div className="flex justify-between text-muted-foreground">
-          <span>Prazo total</span>
-          <span>
-            {totalDays} {totalDays === 1 ? "dia útil" : "dias úteis"}
-          </span>
-        </div>
-        <div className="flex justify-between text-xl font-bold border-t pt-2">
-          <span>Total</span>
-          <span className="text-primary">{formatBRL(total)}</span>
-        </div>
-      </Card>
+      {/* Paper Canvas (900px crisp export container) */}
+      <div className="overflow-x-auto pb-4">
+        <div
+          ref={paperRef}
+          id="paper"
+          className={`w-[900px] mx-auto relative rounded-[6px] border border-[#1c2a23] p-[56px_56px_48px] text-[#f4f7f5] ${
+            isExporting ? "exporting" : ""
+          }`}
+          style={{
+            background:
+              "radial-gradient(900px 420px at 15% -5%, rgba(0,168,89,0.28), transparent 60%), radial-gradient(600px 400px at 100% 100%, rgba(0,168,89,0.14), transparent 60%), #050806",
+          }}
+        >
+          {/* Header */}
+          <div className="flex justify-between items-start gap-6">
+            <div>
+              <img
+                src={logo}
+                alt="Pecin Design"
+                className="h-[92px] w-auto object-contain block select-none"
+              />
+              <h1 className="mt-[34px] font-boldonse text-[46px] font-normal leading-[1.25] text-[#f4f7f5]">
+                Orçamento
+              </h1>
+              <div className="mt-2.5 text-[22px] font-semibold flex items-center gap-2">
+                <span className="text-[#00e57a]">Para:</span>
+                <input
+                  type="text"
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                  placeholder="Nome do cliente"
+                  className="bg-transparent border-none outline-none hover:bg-white/5 focus:bg-[#c6ff00]/10 px-1.5 py-0.5 rounded text-[#f4f7f5] font-semibold w-[360px]"
+                />
+              </div>
+            </div>
 
-      <Dialog open={isTemplateOpen} onOpenChange={setIsTemplateOpen}>
-        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Adicionar do serviço do cliente</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-2">
-            {clientServices.map((s) => (
-              <Card
-                key={s.id}
-                className="p-3 flex items-center justify-between hover:bg-muted cursor-pointer"
-                onClick={() => {
-                  addFromService(s);
-                  setIsTemplateOpen(false);
-                }}
-              >
-                <div>
-                  <div className="font-medium">{s.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {formatBRL(s.price)} · {s.delivery_days}d
+            <div className="text-right text-[14px] text-[#8fa399] leading-[1.7] space-y-1">
+              <div className="flex items-center justify-end gap-1.5">
+                <span>Data:</span>
+                <input
+                  type="text"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  placeholder="dd/mm/aaaa"
+                  className="bg-transparent border-none outline-none hover:bg-white/5 focus:bg-[#c6ff00]/10 px-1.5 rounded text-[#f4f7f5] font-semibold text-right w-28"
+                />
+              </div>
+              <div className="flex items-center justify-end gap-1.5">
+                <span>Validade:</span>
+                <input
+                  type="text"
+                  value={validade}
+                  onChange={(e) => setValidade(e.target.value)}
+                  placeholder="15 dias"
+                  className="bg-transparent border-none outline-none hover:bg-white/5 focus:bg-[#c6ff00]/10 px-1.5 rounded text-[#f4f7f5] font-semibold text-right w-28"
+                />
+              </div>
+              <div className="flex items-center justify-end gap-1.5">
+                <span>Projeto:</span>
+                <input
+                  type="text"
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  placeholder="Nome do projeto"
+                  className="bg-transparent border-none outline-none hover:bg-white/5 focus:bg-[#c6ff00]/10 px-1.5 rounded text-[#f4f7f5] font-semibold text-right w-52"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Sections */}
+          <div className="mt-10 space-y-10">
+            {sections.map((section, secIdx) => (
+              <div key={section.id} className="relative group/sec">
+                <div className="flex items-baseline gap-3.5 pb-2.5 border-b-2 border-[#00e57a] relative">
+                  <input
+                    type="text"
+                    value={section.name}
+                    onChange={(e) => updateSectionName(section.id, e.target.value)}
+                    placeholder="Nome da sessão"
+                    className="font-boldonse text-[20px] leading-[1.3] font-normal text-[#f4f7f5] bg-transparent border-none outline-none hover:bg-white/5 focus:bg-[#c6ff00]/10 px-1 rounded flex-1"
+                  />
+
+                  <div
+                    data-html2canvas-ignore
+                    className="opacity-0 group-hover/sec:opacity-100 transition-opacity flex items-center gap-1 bg-[#0d120f] border border-[#1c2a23] rounded-full px-2 py-0.5"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => moveSection(secIdx, "up")}
+                      disabled={secIdx === 0}
+                      className="w-5 h-5 flex items-center justify-center text-[#8fa399] hover:text-white rounded-full disabled:opacity-30 cursor-pointer"
+                    >
+                      <ArrowUp className="w-3 h-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveSection(secIdx, "down")}
+                      disabled={secIdx === sections.length - 1}
+                      className="w-5 h-5 flex items-center justify-center text-[#8fa399] hover:text-white rounded-full disabled:opacity-30 cursor-pointer"
+                    >
+                      <ArrowDown className="w-3 h-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeSection(section.id)}
+                      className="w-5 h-5 flex items-center justify-center text-red-400 hover:text-red-300 rounded-full cursor-pointer"
+                    >
+                      ×
+                    </button>
                   </div>
                 </div>
-                <Plus className="w-4 h-4" />
-              </Card>
+
+                {/* Column Headers */}
+                <div
+                  className={`grid gap-3.5 px-[18px] pt-[10px] pb-1 text-[12px] font-medium text-[#8fa399] ${
+                    hideValues
+                      ? "grid-cols-[2.3fr_1.3fr_1fr]"
+                      : "grid-cols-[2.2fr_1.3fr_1fr_1.4fr]"
+                  }`}
+                >
+                  <span>Nome</span>
+                  <span>Formato</span>
+                  <span>Prazo</span>
+                  {!hideValues && <span className="text-right">Valor</span>}
+                </div>
+
+                {/* Rows */}
+                <div className="space-y-2">
+                  {section.rows.map((row, rowIdx) => {
+                    const rowColor = getColorHex(row.color);
+                    const isFocusedPrice = focusedPriceId === row.id;
+
+                    return (
+                      <div
+                        key={row.id}
+                        className={`relative group/row rounded-[10px] px-[18px] py-[13px] ${
+                          hideValues
+                            ? "grid grid-cols-[2.3fr_1.3fr_1fr] gap-3.5 items-center"
+                            : "grid grid-cols-[2.2fr_1.3fr_1fr_1.4fr] gap-3.5 items-center"
+                        }`}
+                        style={{
+                          borderLeft: `5px solid ${rowColor}`,
+                          backgroundColor: `color-mix(in srgb, ${rowColor} 11%, #0a100d)`,
+                        }}
+                      >
+                        {/* Floating Hover Controls */}
+                        <div
+                          data-html2canvas-ignore
+                          className="absolute right-2 -top-3 z-20 opacity-0 group-hover/row:opacity-100 transition-opacity flex items-center gap-1 bg-[#0d120f] border border-[#1c2a23] rounded-full px-2 py-0.5 shadow-lg"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => moveRow(section.id, rowIdx, "up")}
+                            disabled={rowIdx === 0}
+                            className="w-5 h-5 flex items-center justify-center text-[#8fa399] hover:text-white rounded-full disabled:opacity-30 cursor-pointer"
+                          >
+                            <ArrowUp className="w-3 h-3" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveRow(section.id, rowIdx, "down")}
+                            disabled={rowIdx === section.rows.length - 1}
+                            className="w-5 h-5 flex items-center justify-center text-[#8fa399] hover:text-white rounded-full disabled:opacity-30 cursor-pointer"
+                          >
+                            <ArrowDown className="w-3 h-3" />
+                          </button>
+
+                          {hourlyRate > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const input = prompt(
+                                  `Quantas horas estimadas? (Taxa atual: ${formatBRL(hourlyRate)}/h)`,
+                                  String(row.hours || 4)
+                                );
+                                if (input !== null) {
+                                  const hrs = parseFloat(input.replace(",", ".")) || 0;
+                                  updateRow(section.id, row.id, {
+                                    hours: hrs,
+                                    price: Math.round(hrs * hourlyRate * 100) / 100,
+                                  });
+                                }
+                              }}
+                              title={`Calcular por hora (${formatBRL(hourlyRate)}/h)`}
+                              className="inline-flex items-center gap-0.5 px-1.5 h-5 rounded-full text-[10px] font-semibold text-[#c6ff00] hover:bg-[#1f2f26] cursor-pointer"
+                            >
+                              <Clock className="w-3 h-3" />
+                              {row.hours > 0 ? `${row.hours}h` : "h"}
+                            </button>
+                          )}
+
+                          <div className="flex items-center gap-1 mx-1">
+                            {COLOR_KEYS.map((k) => (
+                              <button
+                                key={k}
+                                type="button"
+                                onClick={() =>
+                                  updateRow(section.id, row.id, { color: k })
+                                }
+                                title={k}
+                                className={`w-3.5 h-3.5 rounded-full cursor-pointer ${
+                                  row.color === k
+                                    ? "ring-2 ring-white ring-offset-1 ring-offset-[#0d120f]"
+                                    : ""
+                                }`}
+                                style={{ backgroundColor: COLOR_VALUES[k] }}
+                              />
+                            ))}
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => removeRow(section.id, row.id)}
+                            className="w-5 h-5 flex items-center justify-center text-red-400 hover:text-red-300 rounded-full cursor-pointer"
+                          >
+                            ×
+                          </button>
+                        </div>
+
+                        <input
+                          type="text"
+                          value={row.name}
+                          onChange={(e) =>
+                            updateRow(section.id, row.id, { name: e.target.value })
+                          }
+                          placeholder="Nome"
+                          className="w-full bg-transparent border-none outline-none hover:bg-white/5 focus:bg-[#c6ff00]/10 px-1 rounded font-boldonse text-[14px] leading-[1.4]"
+                          style={{ color: rowColor }}
+                        />
+
+                        <input
+                          type="text"
+                          value={row.format}
+                          onChange={(e) =>
+                            updateRow(section.id, row.id, { format: e.target.value })
+                          }
+                          placeholder="Formato"
+                          className="w-full bg-transparent border-none outline-none hover:bg-white/5 focus:bg-[#c6ff00]/10 px-1 rounded text-[14px] text-[#d5dfd9]"
+                        />
+
+                        <input
+                          type="text"
+                          value={row.prazo}
+                          onChange={(e) =>
+                            updateRow(section.id, row.id, { prazo: e.target.value })
+                          }
+                          placeholder="Prazo"
+                          className="w-full bg-transparent border-none outline-none hover:bg-white/5 focus:bg-[#c6ff00]/10 px-1 rounded text-[14px] text-[#d5dfd9]"
+                        />
+
+                        {!hideValues && (
+                          <input
+                            type="text"
+                            value={
+                              isFocusedPrice
+                                ? priceDraft
+                                : row.price > 0
+                                ? formatBRL(row.price)
+                                : ""
+                            }
+                            onFocus={() => {
+                              setFocusedPriceId(row.id);
+                              setPriceDraft(row.price > 0 ? String(row.price) : "");
+                            }}
+                            onChange={(e) => {
+                              setPriceDraft(e.target.value);
+                              updateRow(section.id, row.id, {
+                                price: parseBRL(e.target.value),
+                              });
+                            }}
+                            onBlur={() => {
+                              setFocusedPriceId(null);
+                              updateRow(section.id, row.id, {
+                                price: parseBRL(priceDraft),
+                              });
+                            }}
+                            placeholder="R$ 0,00"
+                            className="w-full bg-transparent border-none outline-none hover:bg-white/5 focus:bg-[#c6ff00]/10 px-1 rounded font-boldonse text-[14px] leading-[1.4] text-right text-[#f4f7f5]"
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Add Line / From Catalog */}
+                <div data-html2canvas-ignore className="flex items-center gap-2.5 mt-3">
+                  <button
+                    type="button"
+                    onClick={() => addRow(section.id)}
+                    className="text-[13px] font-medium text-[#8fa399] hover:text-[#c6ff00] hover:border-[#c6ff00] bg-transparent border border-dashed border-[#2a3a31] rounded-lg px-3.5 py-2 cursor-pointer"
+                  >
+                    + linha
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTargetSectionId(section.id);
+                      setIsImportOpen(true);
+                    }}
+                    className="text-[13px] font-medium text-[#8fa399] hover:text-[#00e57a] hover:border-[#00e57a] bg-transparent border border-dashed border-[#2a3a31] rounded-lg px-3.5 py-2 cursor-pointer"
+                  >
+                    + do catálogo
+                  </button>
+                </div>
+              </div>
             ))}
-            {clientServices.length === 0 && (
-              <div className="text-center text-muted-foreground py-4">
-                Nenhum serviço cadastrado para este cliente.
+          </div>
+
+          {/* Discount Summary Line if applied */}
+          {!hideValues && discountAmount > 0 && (
+            <div className="mt-8 flex justify-end gap-6 text-xs text-[#8fa399] px-2">
+              <span>Subtotal: {formatBRL(subtotal)}</span>
+              <span className="text-[#00e57a]">
+                Desconto:{" "}
+                {discountType === "percent"
+                  ? `${discountValue}% (-${formatBRL(discountAmount)})`
+                  : `-${formatBRL(discountAmount)}`}
+              </span>
+            </div>
+          )}
+
+          {/* Total Banner */}
+          <div className="mt-[44px] flex bg-white rounded-[6px] px-2">
+            <div className="flex-1 flex justify-between items-center bg-[#00a859] px-8 py-4 border-r-[14px] border-l-[14px] border-[#0b6b3a]">
+              <span className="font-boldonse text-[16px] text-white">
+                Valor total
+              </span>
+              <span className="font-boldonse text-[28px] leading-[1.2] text-white">
+                {hideValues ? "Sob consulta" : formatBRL(total)}
+              </span>
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div className="mt-[22px] text-[13px] text-[#8fa399] leading-[1.6] flex items-center gap-1.5">
+            <b className="text-[#00e57a] font-semibold shrink-0">Pagamento:</b>
+            <input
+              type="text"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="50% na aprovação e 50% na entrega."
+              className="bg-transparent border-none outline-none hover:bg-white/5 focus:bg-[#c6ff00]/10 px-1.5 py-0.5 rounded text-[#8fa399] flex-1"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Import Service / Template Dialog */}
+      <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Importar serviço</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {clientServices.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-[#5E6862]">
+                  Serviços de {client.name}
+                </p>
+                {clientServices.map((svc) => (
+                  <button
+                    key={svc.id}
+                    type="button"
+                    onClick={() => importService(svc, true, targetSectionId || undefined)}
+                    className="studio-press w-full text-left p-3 rounded-2xl border border-[#E5E7E2] hover:border-[#00A859] bg-[#FAFAF7] flex items-center justify-between gap-3 cursor-pointer"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-[#111412] truncate">
+                        {svc.name}
+                      </p>
+                      <p className="text-xs text-[#5E6862] studio-nums">
+                        {formatBRL(svc.price)} · {svc.delivery_days} dias
+                      </p>
+                    </div>
+                    <Plus className="w-4 h-4 text-[#00A859] shrink-0" />
+                  </button>
+                ))}
               </div>
             )}
-          </div>
-        </DialogContent>
-      </Dialog>
 
-      <Dialog open={isPdfOptionsOpen} onOpenChange={setIsPdfOptionsOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>O que incluir no PDF</DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-2 gap-3 py-2 text-sm">
-            {([
-              ["stagesPage", "Página 1 — Etapas & Prazos"],
-              ["investmentPage", "Página 2 — Investimento"],
-              ["description", "Descrição dos itens"],
-              ["quantity", "Quantidade"],
-              ["hours", "Horas estimadas"],
-              ["unitPrice", "Preço unitário (sem somar qtd)"],
-              ["itemSubtotal", "Valor por item (preço × qtd)"],
-              ["itemDays", "Prazo por item"],
-              ["totalDays", "Prazo total"],
-              ["startDate", "Data de início"],
-              ["subtotal", "Subtotal"],
-              ["discount", "Desconto"],
-              ["total", "Total"],
-              ["notes", "Observações"],
-            ] as const).map(([key, label]) => (
-              <label key={key} className="flex items-center gap-2 cursor-pointer">
-                <Checkbox
-                  checked={(pdfOpts as any)[key]}
-                  onCheckedChange={(v) =>
-                    setPdfOpts((p) => ({ ...p, [key]: !!v }))
-                  }
-                />
-                <span>{label}</span>
-              </label>
-            ))}
+            {globalTemplates.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-[#5E6862]">
+                  Templates de serviços
+                </p>
+                {globalTemplates.map((svc) => (
+                  <button
+                    key={svc.id}
+                    type="button"
+                    onClick={() => importService(svc, false, targetSectionId || undefined)}
+                    className="studio-press w-full text-left p-3 rounded-2xl border border-[#E5E7E2] hover:border-[#111412] bg-white flex items-center justify-between gap-3 cursor-pointer"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-[#111412] truncate">
+                        {svc.name}
+                      </p>
+                      <p className="text-xs text-[#5E6862] studio-nums">
+                        {formatBRL(svc.price)} · {svc.delivery_days} dias
+                      </p>
+                    </div>
+                    <Plus className="w-4 h-4 text-[#111412] shrink-0" />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {clientServices.length === 0 && globalTemplates.length === 0 && (
+              <p className="text-sm text-[#5E6862] text-center py-6">
+                Nenhum serviço ou template cadastrado ainda.
+              </p>
+            )}
           </div>
-          <DialogFooter>
-            <Button onClick={() => setIsPdfOptionsOpen(false)}>Fechar</Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

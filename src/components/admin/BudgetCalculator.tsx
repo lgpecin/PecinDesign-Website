@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Plus, Trash2, Calculator, FileDown } from "lucide-react";
 import jsPDF from "jspdf";
-import type { Service } from "./ServicesSection";
+import type { Service } from "./budgets/types";
 
 interface BudgetCalculatorProps {
   services: Service[];

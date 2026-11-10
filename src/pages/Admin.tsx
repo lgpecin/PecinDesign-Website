@@ -1,60 +1,56 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import DashboardLayout from '@/components/admin/DashboardLayout';
-import DashboardHome from '@/components/admin/DashboardHome';
-import ProjectList from '@/components/admin/ProjectList';
-import ProjectForm from '@/components/admin/ProjectForm';
-
-import ServicesSection from '@/components/admin/ServicesSection';
-import UsersSection from '@/components/admin/UsersSection';
-import SettingsSection from '@/components/admin/SettingsSection';
-import NotificationPanel from '@/components/admin/NotificationPanel';
-import DataExportImport from '@/components/admin/DataExportImport';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import "@/components/admin/admin.css";
+import DashboardLayout, { type AdminSection } from "@/components/admin/DashboardLayout";
+import DashboardHome from "@/components/admin/DashboardHome";
+import ProjectsSection from "@/components/admin/ProjectsSection";
+import ClientsList from "@/components/admin/budgets/ClientsList";
+import ClientServicesView from "@/components/admin/budgets/ClientServicesView";
+import LibrarySection from "@/components/admin/LibrarySection";
+import type { BudgetClient } from "@/components/admin/budgets/types";
 
 const Admin = () => {
-  const [currentSection, setCurrentSection] = useState('home');
-  const [showForm, setShowForm] = useState(false);
-  const [editingProjectId, setEditingProjectId] = useState<string | undefined>();
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [currentSection, setCurrentSection] = useState<AdminSection>("home");
+  const [activeClient, setActiveClient] = useState<BudgetClient | null>(null);
+  const [clientTab, setClientTab] = useState<"budgets" | "briefings" | "board">("budgets");
+  const [quickNewProject, setQuickNewProject] = useState(false);
+  const [quickNewClient, setQuickNewClient] = useState(false);
+
   const { isAdmin, loading, signOut, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
+    document.body.classList.add("studio-theme");
+    return () => document.body.classList.remove("studio-theme");
+  }, []);
+
+  useEffect(() => {
     if (!loading && !user) {
-      navigate('/auth');
+      navigate("/auth");
     } else if (!loading && user && !isAdmin) {
-      navigate('/');
+      navigate("/");
     }
   }, [user, isAdmin, loading, navigate]);
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/');
+    navigate("/");
   };
 
-  const handleEdit = (projectId: string) => {
-    setEditingProjectId(projectId);
-    setShowForm(true);
-  };
-
-  const handleSuccess = () => {
-    setShowForm(false);
-    setEditingProjectId(undefined);
-    setRefreshKey(prev => prev + 1);
-  };
-
-  const handleCancel = () => {
-    setShowForm(false);
-    setEditingProjectId(undefined);
+  const handleSectionChange = (section: AdminSection) => {
+    setCurrentSection(section);
+    if (section !== "clients") {
+      setActiveClient(null);
+    }
+    setQuickNewProject(false);
+    setQuickNewClient(false);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Carregando...</div>
+      <div className="min-h-[100dvh] bg-[#F6F6F2] flex items-center justify-center">
+        <div className="w-7 h-7 border-2 border-[#00A859] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -65,41 +61,53 @@ const Admin = () => {
 
   const renderSection = () => {
     switch (currentSection) {
-      case 'home':
-        return <DashboardHome onNavigate={setCurrentSection} />;
-      case 'portfolio':
-        return showForm ? (
-          <ProjectForm
-            projectId={editingProjectId}
-            onSuccess={handleSuccess}
-            onCancel={handleCancel}
+      case "home":
+        return (
+          <DashboardHome
+            onNavigate={handleSectionChange}
+            onQuickNewProject={() => {
+              setQuickNewProject(true);
+              setCurrentSection("projects");
+            }}
+            onQuickNewClient={() => {
+              setActiveClient(null);
+              setQuickNewClient(true);
+              setCurrentSection("clients");
+            }}
+            onOpenClient={(client, initialTab = "budgets") => {
+              setActiveClient(client);
+              setClientTab(initialTab);
+              setCurrentSection("clients");
+            }}
+          />
+        );
+      case "projects":
+        return (
+          <ProjectsSection
+            initialNewProject={quickNewProject}
+            onClearInitialNew={() => setQuickNewProject(false)}
+          />
+        );
+      case "clients":
+        return activeClient ? (
+          <ClientServicesView
+            key={`${activeClient.id}-${clientTab}`}
+            client={activeClient}
+            initialTab={clientTab}
+            onBack={() => setActiveClient(null)}
           />
         ) : (
-          <div className="space-y-6">
-            <NotificationPanel />
-            <div className="flex justify-between items-center">
-              <h2 className="text-3xl font-bold">Portfólio</h2>
-              <div className="flex gap-2">
-                <DataExportImport 
-                  tableName="projects" 
-                  buttonLabel="Projetos"
-                  onImportSuccess={() => setRefreshKey(prev => prev + 1)}
-                />
-                <Button onClick={() => setShowForm(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Novo Projeto
-                </Button>
-              </div>
-            </div>
-            <ProjectList onEdit={handleEdit} refresh={refreshKey} />
-          </div>
+          <ClientsList
+            onOpenClient={(client) => {
+              setClientTab("budgets");
+              setActiveClient(client);
+            }}
+            initialNewOpen={quickNewClient}
+            onClearInitialNew={() => setQuickNewClient(false)}
+          />
         );
-      case 'services':
-        return <ServicesSection />;
-      case 'users':
-        return <UsersSection />;
-      case 'settings':
-        return <SettingsSection />;
+      case "library":
+        return <LibrarySection />;
       default:
         return null;
     }
@@ -108,11 +116,7 @@ const Admin = () => {
   return (
     <DashboardLayout
       currentSection={currentSection}
-      onSectionChange={(section) => {
-        setCurrentSection(section);
-        setShowForm(false);
-        setEditingProjectId(undefined);
-      }}
+      onSectionChange={handleSectionChange}
       onSignOut={handleSignOut}
     >
       {renderSection()}

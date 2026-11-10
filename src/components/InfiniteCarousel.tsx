@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 interface CarouselImage {
   id: string;
@@ -20,22 +19,33 @@ const fallbackImages = [slide1, slide2, slide3, slide4, slide5, slide6];
 
 const InfiniteCarousel = () => {
   const [images, setImages] = useState<string[]>(fallbackImages);
+  const [speed, setSpeed] = useState<number>(5);
   const trackRef = useRef<HTMLDivElement>(null);
-  const { settings } = useSiteSettings();
-  const speed = Number(settings.carousel_speed) || 15;
 
   useEffect(() => {
-    const fetchImages = async () => {
-      const { data, error } = await supabase
-        .from("carousel_images")
-        .select("*")
-        .order("display_order", { ascending: true });
+    const fetchCarousel = async () => {
+      const [imagesRes, speedRes] = await Promise.all([
+        supabase
+          .from("carousel_images")
+          .select("*")
+          .order("display_order", { ascending: true }),
+        supabase
+          .from("site_settings")
+          .select("setting_value")
+          .eq("setting_key", "carousel_speed")
+          .maybeSingle(),
+      ]);
 
-      if (!error && data && data.length > 0) {
-        setImages(data.map((img: CarouselImage) => img.image_url));
+      if (!imagesRes.error && imagesRes.data && imagesRes.data.length > 0) {
+        setImages(imagesRes.data.map((img: CarouselImage) => img.image_url));
+      }
+
+      if (!speedRes.error && speedRes.data?.setting_value) {
+        const parsedSpeed = Number(speedRes.data.setting_value);
+        if (parsedSpeed > 0) setSpeed(parsedSpeed);
       }
     };
-    fetchImages();
+    fetchCarousel();
   }, []);
 
   // Once images are loaded, measure the width of one set and use px-based animation

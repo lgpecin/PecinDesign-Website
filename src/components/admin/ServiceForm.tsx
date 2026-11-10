@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Service } from "./ServicesSection";
+import { Service } from "./budgets/types";
 import HoursPricingHelper from "./budgets/HoursPricingHelper";
 import * as Icons from "lucide-react";
 

@@ -1,12 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { Trash2, Plus, GripVertical, Loader2, Image, Upload } from "lucide-react";
+import { Trash2, GripVertical, Loader2, Upload } from "lucide-react";
 
 interface CarouselImage {
   id: string;
@@ -18,7 +14,7 @@ const CarouselManager = () => {
   const [images, setImages] = useState<CarouselImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [speed, setSpeed] = useState(30);
+  const [speed, setSpeed] = useState(5);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   const fetchImages = useCallback(async () => {
@@ -82,11 +78,11 @@ const CarouselManager = () => {
         if (insertError) throw insertError;
       }
 
-      toast.success("Imagens adicionadas com sucesso!");
+      toast.success("Imagens adicionadas");
       fetchImages();
     } catch (error) {
       console.error(error);
-      toast.error("Erro ao fazer upload das imagens");
+      toast.error("Erro ao enviar imagens");
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -94,28 +90,20 @@ const CarouselManager = () => {
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase
-      .from("carousel_images")
-      .delete()
-      .eq("id", id);
-
+    const { error } = await supabase.from("carousel_images").delete().eq("id", id);
     if (error) {
       toast.error("Erro ao remover imagem");
       return;
     }
-
-    toast.success("Imagem removida!");
+    toast.success("Imagem removida");
     fetchImages();
   };
 
-  const handleDragStart = (index: number) => {
-    setDraggedIndex(index);
-  };
+  const handleDragStart = (index: number) => setDraggedIndex(index);
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
     if (draggedIndex === null || draggedIndex === index) return;
-
     const newImages = [...images];
     const [dragged] = newImages.splice(draggedIndex, 1);
     newImages.splice(index, 0, dragged);
@@ -125,21 +113,19 @@ const CarouselManager = () => {
 
   const handleDragEnd = async () => {
     setDraggedIndex(null);
-    // Save new order
     for (let i = 0; i < images.length; i++) {
       await supabase
         .from("carousel_images")
         .update({ display_order: i })
         .eq("id", images[i].id);
     }
-    toast.success("Ordem atualizada!");
+    toast.success("Ordem atualizada");
   };
 
   const handleSpeedChange = async (value: number[]) => {
     const newSpeed = value[0];
     setSpeed(newSpeed);
 
-    // Upsert the speed setting
     const { data: existing } = await supabase
       .from("site_settings")
       .select("id")
@@ -163,54 +149,35 @@ const CarouselManager = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-32">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      <div className="flex items-center justify-center h-40 bg-white rounded-3xl border border-[#E5E7E2]">
+        <Loader2 className="h-5 w-5 animate-spin text-[#00A859]" />
       </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Image className="h-5 w-5" />
-          Carrossel de Imagens
-        </CardTitle>
-        <CardDescription>
-          Gerencie as imagens do carrossel infinito na seção "E quem sou eu?"
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Speed control */}
-        <div className="space-y-3">
-          <Label>Velocidade (segundos por imagem): {speed}s</Label>
-          <Slider
-            value={[speed]}
-            onValueChange={handleSpeedChange}
-            min={5}
-            max={60}
-            step={1}
-            className="w-full max-w-md"
-          />
-          <p className="text-xs text-muted-foreground">
-            Menor = mais rápido. Maior = mais lento.
+    <div className="bg-white border border-[#E5E7E2] rounded-3xl p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-base font-semibold text-[#111412]">
+            Carrossel da página inicial
+          </h2>
+          <p className="text-xs text-[#5E6862] mt-0.5">
+            Arraste para ordenar os slides exibidos no loop contínuo.
           </p>
         </div>
 
-        {/* Upload button */}
-        <div>
-          <Label
-            htmlFor="carousel-upload"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg cursor-pointer hover:bg-primary/90 transition-colors"
-          >
-            {uploading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Upload className="h-4 w-4" />
-            )}
-            {uploading ? "Enviando..." : "Adicionar Imagens"}
-          </Label>
-          <Input
+        <label
+          htmlFor="carousel-upload"
+          className="studio-press inline-flex items-center gap-2 px-4 py-2 bg-[#111412] hover:bg-[#232925] text-white text-xs font-semibold rounded-full cursor-pointer"
+        >
+          {uploading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Upload className="h-3.5 w-3.5 text-[#CCFF00]" />
+          )}
+          {uploading ? "Enviando..." : "Adicionar imagens"}
+          <input
             id="carousel-upload"
             type="file"
             accept="image/*"
@@ -219,49 +186,64 @@ const CarouselManager = () => {
             className="hidden"
             disabled={uploading}
           />
-        </div>
+        </label>
+      </div>
 
-        {/* Image list */}
-        <div className="space-y-2">
-          {images.length === 0 ? (
-            <p className="text-muted-foreground text-sm py-4 text-center">
-              Nenhuma imagem no carrossel. Adicione imagens acima.
-            </p>
-          ) : (
-            images.map((img, index) => (
-              <div
-                key={img.id}
-                draggable
-                onDragStart={() => handleDragStart(index)}
-                onDragOver={(e) => handleDragOver(e, index)}
-                onDragEnd={handleDragEnd}
-                className={`flex items-center gap-3 p-2 rounded-lg border bg-background hover:bg-accent/50 transition-colors ${
-                  draggedIndex === index ? "opacity-50" : ""
-                }`}
-              >
-                <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab flex-shrink-0" />
-                <img
-                  src={img.image_url}
-                  alt={`Carousel ${index + 1}`}
-                  className="h-16 w-auto rounded object-contain"
-                />
-                <span className="text-sm text-muted-foreground flex-1">
-                  #{index + 1}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleDelete(img.id)}
-                  className="text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))
-          )}
+      {/* Speed control */}
+      <div className="p-4 rounded-2xl bg-[#F6F6F2] border border-[#E5E7E2] space-y-2.5 max-w-md">
+        <div className="flex items-center justify-between text-xs">
+          <span className="font-medium text-[#111412]">Velocidade por slide</span>
+          <span className="font-semibold text-[#00A859] studio-nums">{speed}s</span>
         </div>
-      </CardContent>
-    </Card>
+        <Slider
+          value={[speed]}
+          onValueChange={handleSpeedChange}
+          min={3}
+          max={60}
+          step={1}
+        />
+      </div>
+
+      {/* Image list */}
+      {images.length === 0 ? (
+        <div className="py-10 text-center text-sm text-[#5E6862] border border-dashed border-[#D6D9D2] rounded-2xl">
+          Nenhuma imagem cadastrada no carrossel.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {images.map((img, index) => (
+            <div
+              key={img.id}
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragEnd={handleDragEnd}
+              className={`flex items-center gap-3 p-2.5 rounded-2xl border border-[#E5E7E2] bg-[#FAFAF7] hover:border-[#C5CBC2] transition-colors cursor-move ${
+                draggedIndex === index ? "opacity-50" : ""
+              }`}
+            >
+              <GripVertical className="h-4 w-4 text-[#8FA399] shrink-0" />
+              <img
+                src={img.image_url}
+                alt={`Slide ${index + 1}`}
+                className="h-14 w-24 rounded-xl object-cover bg-[#EBECE6]"
+              />
+              <span className="text-xs font-semibold text-[#5E6862] flex-1 studio-nums">
+                #{index + 1}
+              </span>
+              <button
+                type="button"
+                onClick={() => handleDelete(img.id)}
+                className="studio-press p-2 rounded-full text-[#8FA399] hover:text-red-600 hover:bg-red-50 cursor-pointer"
+                aria-label="Remover imagem"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 

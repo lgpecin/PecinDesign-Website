@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Service } from "./ServicesSection";
+import type { Service } from "./budgets/types";
 
 const TemplatesSection = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -175,43 +175,38 @@ const TemplatesSection = () => {
   return (
     <div className="space-y-6">
       <style>{`
-        .drag-item { will-change: transform, opacity; }
-        .drag-item.dragging { opacity: 0.4; transform: scale(0.95) rotate(2deg); }
+        .drag-item.dragging { opacity: 0.45; }
         .drag-item.drag-over {
-          transform: scale(1.05);
-          box-shadow: 0 0 0 3px hsl(var(--primary) / 0.3),
-                      0 20px 40px -10px hsl(var(--primary) / 0.4);
-          border-radius: 12px;
-        }
-        .drag-item:hover:not(.dragging) {
-          box-shadow: 0 10px 30px -10px hsl(var(--primary) / 0.2);
+          outline: 2px solid #00A859;
+          outline-offset: 2px;
+          border-radius: 18px;
         }
       `}</style>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div>
-            <h2 className="text-2xl font-bold">Templates de Serviços</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Biblioteca reutilizável — copie templates para clientes na aba "Clientes".
+            <h2 className="text-lg font-semibold text-[#111412]">Templates de Serviços</h2>
+            <p className="text-xs text-[#5E6862] mt-0.5">
+              {filteredServices.length} {filteredServices.length === 1 ? "template" : "templates"}
             </p>
           </div>
-          <div className="flex gap-1 border rounded-md p-1">
+          <div className="flex gap-1 border border-[#E5E7E2] bg-white rounded-full p-1">
             <Button
               variant={viewMode === "grid" ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setViewMode("grid")}
-              className="h-8 w-8 p-0"
+              className={`h-7 w-7 p-0 rounded-full ${viewMode === "grid" ? "bg-[#111412] text-white hover:bg-[#111412]" : "text-[#5E6862]"}`}
             >
-              <LayoutGrid className="h-4 w-4" />
+              <LayoutGrid className="h-3.5 w-3.5" />
             </Button>
             <Button
               variant={viewMode === "list" ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setViewMode("list")}
-              className="h-8 w-8 p-0"
+              className={`h-7 w-7 p-0 rounded-full ${viewMode === "list" ? "bg-[#111412] text-white hover:bg-[#111412]" : "text-[#5E6862]"}`}
             >
-              <List className="h-4 w-4" />
+              <List className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
@@ -221,11 +216,18 @@ const TemplatesSection = () => {
             buttonLabel="Templates"
             onImportSuccess={() => queryClient.invalidateQueries({ queryKey: ["services"] })}
           />
-          <Button onClick={() => setIsShareManagerOpen(true)} variant="outline">
+          <Button
+            onClick={() => setIsShareManagerOpen(true)}
+            variant="outline"
+            className="rounded-full border-[#E5E7E2] bg-white text-[#111412] hover:bg-[#F6F6F2] text-xs px-4"
+          >
             Gerenciar links
           </Button>
-          <Button onClick={() => setIsFormOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
+          <Button
+            onClick={() => setIsFormOpen(true)}
+            className="rounded-full bg-[#111412] hover:bg-[#232925] text-white text-xs px-4"
+          >
+            <Plus className="w-3.5 h-3.5 mr-1.5" />
             Novo template
           </Button>
         </div>
@@ -267,9 +269,11 @@ const TemplatesSection = () => {
               const categoryServices = groupedServices[category];
               return (
                 <div key={category}>
-                  <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                  <h3 className="text-base font-semibold text-[#111412] mb-3 flex items-center gap-2">
                     {categoryNames[category] || category}
-                    <Badge variant="secondary">{categoryServices.length}</Badge>
+                    <Badge variant="secondary" className="rounded-full bg-[#EFEFEA] text-[#5E6862] studio-nums">
+                      {categoryServices.length}
+                    </Badge>
                   </h3>
 
                   {viewMode === "grid" ? (
@@ -283,11 +287,9 @@ const TemplatesSection = () => {
                           onDragOver={handleDragOver}
                           onDragLeave={handleDragLeave}
                           onDrop={(e) => handleDrop(e, service)}
-                          className={`cursor-move transition-all duration-300 ease-out ${
-                            draggedService?.id === service.id
-                              ? "opacity-40 scale-95"
-                              : "opacity-100 scale-100"
-                          } hover:scale-[1.02] active:scale-[0.98] drag-item`}
+                          className={`cursor-move transition-opacity duration-150 studio-press ${
+                            draggedService?.id === service.id ? "opacity-40" : "opacity-100"
+                          } drag-item`}
                         >
                           <ServiceCard
                             service={service}
@@ -310,36 +312,34 @@ const TemplatesSection = () => {
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
                             onDrop={(e) => handleDrop(e, service)}
-                            className={`cursor-move transition-all duration-300 ease-out ${
-                              draggedService?.id === service.id
-                                ? "opacity-40 scale-[0.98]"
-                                : "opacity-100 scale-100"
-                            } hover:bg-muted/50 drag-item`}
+                            className={`cursor-move rounded-2xl border border-[#E5E7E2] bg-white transition-colors duration-150 ${
+                              draggedService?.id === service.id ? "opacity-40" : "opacity-100"
+                            } hover:bg-[#FAFAF7] drag-item`}
                           >
                             <div className="flex items-center gap-4 p-4">
-                              <GripVertical className="h-5 w-5 text-muted-foreground shrink-0" />
+                              <GripVertical className="h-5 w-5 text-[#8A948D] shrink-0" />
                               <div
-                                className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                                 style={{ backgroundColor: `${service.color}20` }}
                               >
                                 <IconComponent className="h-5 w-5" style={{ color: service.color }} />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <h4 className="font-semibold truncate">{service.name}</h4>
-                                <p className="text-sm text-muted-foreground truncate">
+                                <h4 className="font-semibold text-[#111412] truncate">{service.name}</h4>
+                                <p className="text-xs text-[#5E6862] truncate">
                                   {service.description || "Sem descrição"}
                                 </p>
                               </div>
                               <div className="flex items-center gap-4 shrink-0">
-                                <div className="text-right">
-                                  <div className="font-semibold text-primary">
+                                <div className="text-right studio-nums">
+                                  <div className="font-semibold text-[#00A859]">
                                     R$ {service.price.toFixed(2)}
                                   </div>
-                                  <div className="text-xs text-muted-foreground">
+                                  <div className="text-xs text-[#5E6862]">
                                     {service.delivery_days} {service.delivery_days === 1 ? "dia" : "dias"}
                                   </div>
                                 </div>
-                                <Badge variant={service.is_active ? "default" : "secondary"}>
+                                <Badge variant={service.is_active ? "default" : "secondary"} className="rounded-full">
                                   {service.is_active ? "Ativo" : "Inativo"}
                                 </Badge>
                                 <div className="flex gap-1">

@@ -425,6 +425,17 @@ All colors MUST be HSL.
   }
 }
 
+/* ── Orçamento Paper (Template Visual - Pecin Design) ── */
+#paper.exporting input {
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+#paper.exporting [data-html2canvas-ignore] {
+  display: none !important;
+}
+
 .animate-hero-carousel {
   animation: heroCarouselReveal 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
 }

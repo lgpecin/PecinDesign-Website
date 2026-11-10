@@ -20,9 +20,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Trash2, Edit, TrendingUp, Wallet, Info } from "lucide-react";
+import { Plus, Trash2, Edit, TrendingUp, Wallet, Info, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { useHourlyRate } from "@/hooks/useHourlyRate";
 
 type Expense = {
   id: string;
@@ -88,6 +89,8 @@ const ExpensesSection = () => {
   });
 
   const [overheadDraft, setOverheadDraft] = useState<string>("");
+  const { hourlyRate, setHourlyRate } = useHourlyRate();
+  const [rateDraft, setRateDraft] = useState<string>("");
 
   const saveOverhead = useMutation({
     mutationFn: async (value: number) => {
@@ -149,12 +152,11 @@ const ExpensesSection = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-2xl font-bold">Custos do Negócio</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Cadastre equipamentos, assinaturas e outros gastos. Configure quanto
-            somar em cada orçamento para cobrir esses custos.
+          <h2 className="text-lg font-semibold text-[#111412]">Custos do Estúdio</h2>
+          <p className="text-xs text-[#5E6862] mt-0.5">
+            Equipamentos, assinaturas, hora técnica e rateio por orçamento.
           </p>
         </div>
         <Dialog
@@ -165,8 +167,11 @@ const ExpensesSection = () => {
           }}
         >
           <DialogTrigger asChild>
-            <Button onClick={() => setEditing(null)}>
-              <Plus className="w-4 h-4 mr-2" />
+            <Button
+              onClick={() => setEditing(null)}
+              className="rounded-full bg-[#111412] hover:bg-[#232925] text-white text-xs px-4"
+            >
+              <Plus className="w-3.5 h-3.5 mr-1.5" />
               Novo Custo
             </Button>
           </DialogTrigger>
@@ -189,104 +194,141 @@ const ExpensesSection = () => {
       </div>
 
       {/* Totais */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wide">
-            <TrendingUp className="w-3.5 h-3.5" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="p-5 rounded-3xl border border-[#E5E7E2] bg-[#E6F7EE]">
+          <div className="flex items-center gap-2 text-[#111412]/70 text-xs font-medium uppercase tracking-wide">
+            <TrendingUp className="w-3.5 h-3.5 text-[#00A859]" />
             Total Mensal
           </div>
-          <div className="text-2xl font-bold mt-1">{fmt(monthlyTotal)}</div>
-          <div className="text-xs text-muted-foreground mt-1">
+          <div className="text-2xl font-bold text-[#111412] mt-1.5 studio-nums">{fmt(monthlyTotal)}</div>
+          <div className="text-xs text-[#5E6862] mt-1">
             Recorrências mensais + anuais/12
           </div>
         </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wide">
-            <TrendingUp className="w-3.5 h-3.5" />
+        <Card className="p-5 rounded-3xl border border-[#E5E7E2] bg-white">
+          <div className="flex items-center gap-2 text-[#5E6862] text-xs font-medium uppercase tracking-wide">
+            <TrendingUp className="w-3.5 h-3.5 text-[#00A859]" />
             Total Anual
           </div>
-          <div className="text-2xl font-bold mt-1">{fmt(yearlyTotal)}</div>
-          <div className="text-xs text-muted-foreground mt-1">
-            Projeção baseada no mensal
+          <div className="text-2xl font-bold text-[#111412] mt-1.5 studio-nums">{fmt(yearlyTotal)}</div>
+          <div className="text-xs text-[#5E6862] mt-1">
+            Projeção anualizada
           </div>
         </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wide">
-            <Wallet className="w-3.5 h-3.5" />
+        <Card className="p-5 rounded-3xl border border-[#E5E7E2] bg-[#F1F8D0]">
+          <div className="flex items-center gap-2 text-[#111412]/70 text-xs font-medium uppercase tracking-wide">
+            <Wallet className="w-3.5 h-3.5 text-[#3F6B00]" />
             Investimentos Únicos
           </div>
-          <div className="text-2xl font-bold mt-1">{fmt(oneTimeTotal)}</div>
-          <div className="text-xs text-muted-foreground mt-1">
+          <div className="text-2xl font-bold text-[#111412] mt-1.5 studio-nums">{fmt(oneTimeTotal)}</div>
+          <div className="text-xs text-[#5E6862] mt-1">
             Compras pontuais registradas
           </div>
         </Card>
       </div>
 
-      {/* Rateio por orçamento */}
-      <Card className="p-4 border-primary/40">
-        <div className="flex items-start gap-2 mb-3">
-          <Info className="w-4 h-4 text-primary mt-0.5" />
-          <div>
-            <h3 className="font-semibold">Rateio por Orçamento</h3>
-            <p className="text-xs text-muted-foreground">
-              Defina um valor fixo (R$) para somar em cada orçamento e ajudar a
-              cobrir seus custos. Use como referência ao montar propostas.
+      {/* Valor/Hora e Rateio por orçamento */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="p-5 rounded-3xl border border-[#E5E7E2]">
+          <div className="flex items-start gap-2 mb-3">
+            <Clock className="w-4 h-4 text-[#00A859] mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-[#111412]">Valor da Hora Técnica</h3>
+              <p className="text-xs text-[#5E6862]">
+                Referência usada nos orçamentos ao calcular por horas.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-end gap-2 flex-wrap">
+            <div className="flex-1 min-w-[140px]">
+              <Label className="text-xs">Valor por hora (R$/h)</Label>
+              <Input
+                type="text"
+                inputMode="decimal"
+                placeholder={String(hourlyRate)}
+                value={rateDraft}
+                onChange={(e) => setRateDraft(e.target.value)}
+              />
+            </div>
+            <Button
+              onClick={() => {
+                const v = parseFloat(rateDraft.replace(",", ".")) || 0;
+                setHourlyRate(v);
+                setRateDraft("");
+              }}
+              className="rounded-full bg-[#111412] hover:bg-[#232925] text-white text-xs px-4"
+            >
+              Salvar
+            </Button>
+            <div className="text-sm studio-nums">
+              Atual: <span className="font-semibold text-[#00A859]">{fmt(hourlyRate)}/h</span>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-5 rounded-3xl border border-[#E5E7E2]">
+          <div className="flex items-start gap-2 mb-3">
+            <Info className="w-4 h-4 text-[#00A859] mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-[#111412]">Rateio por Orçamento</h3>
+              <p className="text-xs text-[#5E6862]">
+                Valor fixo sugerido para cobrir custos operacionais em cada projeto.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-end gap-2 flex-wrap">
+            <div className="flex-1 min-w-[140px]">
+              <Label className="text-xs">Valor por orçamento (R$)</Label>
+              <Input
+                type="text"
+                inputMode="decimal"
+                placeholder={String(overhead)}
+                value={overheadDraft}
+                onChange={(e) => setOverheadDraft(e.target.value)}
+              />
+            </div>
+            <Button
+              onClick={() => {
+                const v = parseFloat(overheadDraft.replace(",", ".")) || 0;
+                saveOverhead.mutate(v);
+                setOverheadDraft("");
+              }}
+              disabled={saveOverhead.isPending}
+              className="rounded-full bg-[#111412] hover:bg-[#232925] text-white text-xs px-4"
+            >
+              Salvar
+            </Button>
+            <div className="text-sm studio-nums">
+              Atual: <span className="font-semibold text-[#00A859]">{fmt(overhead)}</span>
+            </div>
+          </div>
+          {monthlyTotal > 0 && (
+            <p className="text-xs text-[#5E6862] mt-3 studio-nums">
+              Sugestão (4 projetos/mês): <strong>{fmt(monthlyTotal / 4)}</strong>
             </p>
-          </div>
-        </div>
-        <div className="flex items-end gap-2 flex-wrap">
-          <div className="flex-1 min-w-[180px]">
-            <Label className="text-xs">Valor a aplicar por orçamento (R$)</Label>
-            <Input
-              type="text"
-              inputMode="decimal"
-              placeholder={String(overhead)}
-              value={overheadDraft}
-              onChange={(e) => setOverheadDraft(e.target.value)}
-            />
-          </div>
-          <Button
-            onClick={() => {
-              const v = parseFloat(overheadDraft.replace(",", ".")) || 0;
-              saveOverhead.mutate(v);
-              setOverheadDraft("");
-            }}
-            disabled={saveOverhead.isPending}
-          >
-            Salvar
-          </Button>
-          <div className="text-sm">
-            Atual:{" "}
-            <span className="font-semibold text-primary">{fmt(overhead)}</span>
-          </div>
-        </div>
-        {monthlyTotal > 0 && (
-          <p className="text-xs text-muted-foreground mt-3">
-            Sugestão: se você fecha ~4 orçamentos/mês, aplique cerca de{" "}
-            <strong>{fmt(monthlyTotal / 4)}</strong> em cada.
-          </p>
-        )}
-      </Card>
+          )}
+        </Card>
+      </div>
 
       {/* Lista */}
       <div className="space-y-2">
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Carregando...</p>
+          <p className="text-sm text-[#5E6862]">Carregando...</p>
         ) : expenses.length === 0 ? (
-          <Card className="p-8 text-center text-muted-foreground text-sm">
+          <Card className="p-8 rounded-3xl border border-[#E5E7E2] text-center text-[#5E6862] text-sm">
             Nenhum custo cadastrado. Clique em "Novo Custo" para começar.
           </Card>
         ) : (
           expenses.map((e) => (
-            <Card key={e.id} className="p-3 flex items-center gap-3">
+            <Card key={e.id} className="p-4 rounded-2xl border border-[#E5E7E2] bg-white flex items-center gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-semibold">{e.name}</span>
-                  <span className="text-[10px] uppercase tracking-wide bg-muted px-2 py-0.5 rounded">
+                  <span className="font-semibold text-[#111412]">{e.name}</span>
+                  <span className="text-[10px] uppercase tracking-wide bg-[#F6F6F2] text-[#5E6862] border border-[#E5E7E2] px-2.5 py-0.5 rounded-full">
                     {CATEGORIES.find((c) => c.value === e.category)?.label ||
                       e.category}
                   </span>
-                  <span className="text-[10px] uppercase tracking-wide bg-primary/10 text-primary px-2 py-0.5 rounded">
+                  <span className="text-[10px] uppercase tracking-wide bg-[#E6F7EE] text-[#008746] px-2.5 py-0.5 rounded-full font-medium">
                     {RECURRENCES.find((r) => r.value === e.recurrence)?.label ||
                       e.recurrence}
                   </span>
