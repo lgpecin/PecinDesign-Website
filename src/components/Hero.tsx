@@ -13,40 +13,37 @@ import { useLanguage } from "@/contexts/LanguageContext";
    Altere as porcentagens (%) e valores abaixo para calibrar na mão o layout mobile:
    ════════════════════════════════════════════════════════════════════════════════ */
 const MOBILE_HERO = {
-  // 0. ESPAÇAMENTO INICIAL DO TOPO (Abaixo do Logo e menu PT/EN)
-  espacoInicialTopo: "10px",
+  // 0. ESPAÇAMENTO INICIAL DO TOPO (Espaço p/ o boné subir acima do "Opa, tudo bom?")
+  espacoInicialTopo: "26px",
 
   // 1. PROPORÇÕES E POSIÇÃO HORIZONTAL/VERTICAL (Colunas)
-  colunaTextoLargura: "48%",
-  colunaTextoMargemEsquerda: "6.5%",
-  fotoLargura: "30%",
-  fotoEscalaZoom: "220%",
-  fotoPosicaoVertical: "-25px",
-  fotoDeslocamentoDireita: "-3%",
+  colunaTextoLargura: "56%",
+  colunaTextoMargemEsquerda: "1%",
+  fotoLargura: "80%",
+  fotoBaseInferior: "-8px",
+  fotoDeslocamentoDireita: "-14%",
 
   // 2. TÍTULO "Opa, tudo bom?"
-  tituloTamanho: "clamp(15px, 4.8vw, 20px)",
-  tituloMargemInferior: "13px",
+  tituloTamanho: "clamp(20px, 5.7vw, 27px)",
+  tituloMargemInferior: "10px",
 
   // 3. CAIXA PONTILHADA "Se você precisa de..."
-  caixaLarguraExtra: "0px",
-  caixaPadding: "10px 12px",
+  caixaPadding: "9px 11px",
   caixaMargemInferior: "10px",
 
   // 4. BOTÃO WHATSAPP "Fale comigo!"
-  botaoPadding: "10px 14px",
-  botaoFonteTamanho: "14px",
-  botaoIconeTamanho: "18px",
-  espacoAbaixoBotao: "22px",
+  botaoPadding: "10px 12px",
+  botaoFonteTamanho: "clamp(14px, 4.1vw, 18px)",
+  botaoIconeTamanho: "20px",
+  botaoMargemInferior: "12px",
 
-  // 5. FAIXA VERDE "designer & diretor de arte"
-  faixaMargemSuperior: "-10px",
-  faixaTextoTamanho: "clamp(13px, 4vw, 18px)",
+  // 5. ÍCONES SOCIAIS (Dentro da coluna esquerda, abaixo do botão e acima da faixa)
+  sociaisTamanhoIcone: "30px",
+  espacoAbaixoSociais: "14px",
 
-  // 6. ÍCONES SOCIAIS (Instagram, LinkedIn, Behance)
-  sociaisEspacoTopo: "12px",
-  sociaisEspacoEmbaixo: "6px",
-  sociaisTamanhoIcone: "26px",
+  // 6. FAIXA VERDE "designer * diretor de arte"
+  faixaMargemSuperior: "-4px",
+  faixaTextoTamanho: "clamp(15px, 4.5vw, 22px)",
 } as const;
 
 const SELECTION_HANDLES_MOBILE = [
@@ -82,13 +79,16 @@ const Hero = () => {
     { href: settings.behance_url, label: "Behance", Icon: BehanceIcon },
   ];
 
+  const ribbonText = t("hero.ribbon");
+  const ribbonParts = ribbonText.split(/\s*&\s*/);
+
   return (
     <section
       id="hero"
-      className="relative overflow-hidden pt-20 sm:pt-24 md:pt-28 pb-6 sm:pb-12 bg-[#0a0c0e]"
+      className="relative overflow-hidden pt-28 sm:pt-24 md:pt-28 pb-6 sm:pb-12 bg-[#0a0c0e]"
     >
       {/* Full-width edge-to-edge background illustration */}
-      <div className="absolute top-0 left-0 right-0 w-full h-[800px] sm:h-[900px] md:h-[1000px] pointer-events-none overflow-hidden z-0">
+      <div className="absolute top-0 left-0 right-0 w-full h-auto sm:h-[900px] md:h-[1000px] pointer-events-none overflow-hidden z-0">
         <img
           src="/hero-bg.webp"
           alt=""
@@ -97,14 +97,14 @@ const Hero = () => {
           loading="eager"
           fetchPriority="high"
           decoding="async"
-          className="w-full h-full object-cover object-top opacity-75"
+          className="w-full h-auto sm:h-full object-contain sm:object-cover object-top opacity-100 sm:opacity-75"
           aria-hidden="true"
         />
         {/* Soft bottom fade to blend seamlessly into section background */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "linear-gradient(to bottom, rgba(10,12,14,0.1) 0%, rgba(10,12,14,0.3) 60%, #0a0c0e 100%)",
+            background: "linear-gradient(to bottom, rgba(10,12,14,0) 0%, rgba(10,12,14,0.22) 60%, #0a0c0e 100%)",
           }}
         />
       </div>
@@ -113,20 +113,19 @@ const Hero = () => {
         {/* Hero Visual Container */}
         <div className="relative w-full max-w-5xl mx-auto my-1 sm:my-2">
 
-          {/* ── MOBILE LAYOUT (< md): 100% calibrável via objeto MOBILE_HERO acima ── */}
+          {/* ── MOBILE LAYOUT (< md): Alinhado ao print de referência ── */}
           <div className="flex flex-col md:hidden">
 
-            {/* Main content block: left text + right photo (absolute) */}
-            <div className="relative w-full overflow-hidden" style={{ paddingTop: MOBILE_HERO.espacoInicialTopo }}>
+            {/* Main content block: left text + socials + right photo (overflow-visible p/ braço sangrar até a borda da seção) */}
+            <div className="relative w-full" style={{ paddingTop: MOBILE_HERO.espacoInicialTopo }}>
 
-              {/* Photo — absolute top-right (Camada acima dos elementos da esquerda, mas abaixo da faixa verde) */}
+              {/* Photo — anchored at bottom right behind the ribbon, cap rises above title */}
               <div
-                className="absolute pointer-events-none animate-hero-photo z-10"
+                className="absolute pointer-events-none animate-hero-photo z-10 max-w-[360px]"
                 style={{
-                  top: MOBILE_HERO.fotoPosicaoVertical,
+                  bottom: MOBILE_HERO.fotoBaseInferior,
                   width: MOBILE_HERO.fotoLargura,
                   right: MOBILE_HERO.fotoDeslocamentoDireita,
-                  bottom: 0,
                 }}
               >
                 <img
@@ -135,17 +134,13 @@ const Hero = () => {
                   width={693}
                   height={647}
                   decoding="async"
-                  className="w-full h-full object-contain object-top drop-shadow-2xl transition-transform duration-200"
-                  style={{
-                    transform: `scale(${parseFloat(MOBILE_HERO.fotoEscalaZoom) / 100})`,
-                    transformOrigin: "top right",
-                  }}
+                  className="w-full h-auto block drop-shadow-2xl"
                   loading="eager"
                   fetchPriority="high"
                 />
               </div>
 
-              {/* Left column: title + box + button (Camada base z-0) */}
+              {/* Left column: title + box + button + social icons */}
               <div
                 className="relative z-0 flex flex-col"
                 style={{
@@ -170,16 +165,15 @@ const Hero = () => {
                   </h1>
                 </div>
 
-                {/* Dashed selection box — wrapped so keyframe transform doesn't override rotate(-0.4deg) */}
+                {/* Dashed selection box — crisp 1.5px border + small 5px handles */}
                 <div className="w-full animate-hero-box" style={{ marginBottom: MOBILE_HERO.caixaMargemInferior }}>
                   <div
-                    className="relative bg-black/60"
+                    className="relative bg-black/55"
                     style={{
-                      border: "2px dashed rgba(255,255,255,0.85)",
+                      border: "1.5px dashed rgba(255,255,255,0.7)",
                       padding: MOBILE_HERO.caixaPadding,
-                      transform: "rotate(-0.4deg)",
+                      transform: "rotate(-0.5deg)",
                       transformOrigin: "top left",
-                      width: `calc(100% + ${MOBILE_HERO.caixaLarguraExtra})`,
                     }}
                   >
                     {SELECTION_HANDLES_MOBILE.map((pos, i) => (
@@ -187,17 +181,32 @@ const Hero = () => {
                         key={i}
                         style={{
                           position: "absolute",
-                          width: "7px",
-                          height: "7px",
+                          width: "5px",
+                          height: "5px",
                           background: "#020403",
-                          border: "1.5px solid white",
+                          border: "1px solid rgba(255,255,255,0.85)",
                           ...pos,
                         }}
                       />
                     ))}
-                    <p className="text-white font-medium leading-[1.4]" style={{ fontSize: "12px" }}>{t("hero.box_line1")}</p>
-                    <p className="font-bold text-[#00ff88] leading-[1.3]" style={{ fontSize: "14px" }}>{t("hero.box_line2")}</p>
-                    <p className="font-bold text-[#00ff88] leading-[1.3]" style={{ fontSize: "14px" }}>{t("hero.box_line3")}</p>
+                    <p
+                      className="text-white font-medium leading-[1.3] whitespace-nowrap"
+                      style={{ fontSize: "clamp(12px, 3.6vw, 17px)" }}
+                    >
+                      {t("hero.box_line1")}
+                    </p>
+                    <p
+                      className="font-bold text-[#00ff88] leading-[1.24] whitespace-nowrap"
+                      style={{ fontSize: "clamp(13px, 4.2vw, 20px)" }}
+                    >
+                      {t("hero.box_line2")}
+                    </p>
+                    <p
+                      className="font-bold text-[#00ff88] leading-[1.24] whitespace-nowrap"
+                      style={{ fontSize: "clamp(13px, 4.2vw, 20px)" }}
+                    >
+                      {t("hero.box_line3")}
+                    </p>
                   </div>
                 </div>
 
@@ -206,8 +215,12 @@ const Hero = () => {
                   href={whatsappLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="animate-hero-btn w-full inline-flex items-center justify-center gap-2 bg-[#00a166] hover:bg-[#00c17a] text-white rounded-xl font-boldonse shadow-[0_5px_18px_rgba(0,161,102,0.5)] transition-all duration-300 active:scale-95 pointer-events-auto"
-                  style={{ padding: MOBILE_HERO.botaoPadding, fontSize: MOBILE_HERO.botaoFonteTamanho }}
+                  className="animate-hero-btn w-full inline-flex items-center justify-center gap-2 bg-[#00a166] hover:bg-[#00c17a] text-white rounded-[9px] font-boldonse shadow-[0_5px_18px_rgba(0,161,102,0.45)] transition-all duration-300 active:scale-95 pointer-events-auto"
+                  style={{
+                    padding: MOBILE_HERO.botaoPadding,
+                    fontSize: MOBILE_HERO.botaoFonteTamanho,
+                    marginBottom: MOBILE_HERO.botaoMargemInferior,
+                  }}
                 >
                   <span
                     className="shrink-0 inline-flex items-center justify-center"
@@ -218,12 +231,29 @@ const Hero = () => {
                   {t("hero.cta_whatsapp")}
                 </a>
 
-                {/* Spacer to allow photo to show below button */}
-                <div style={{ height: MOBILE_HERO.espacoAbaixoBotao }} aria-hidden />
+                {/* Social icons — centered inside left column, above ribbon */}
+                <div
+                  className="w-full flex items-center justify-center gap-3.5 animate-hero-socials"
+                  style={{ marginBottom: MOBILE_HERO.espacoAbaixoSociais }}
+                >
+                  {socialItems.map(({ href, label, Icon }) => (
+                    <a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={label}
+                      className="rounded-full bg-[#141517]/85 border border-white/20 flex items-center justify-center text-white/80 hover:text-white hover:border-[#00ff88] transition-all hover:scale-110 shadow-sm"
+                      style={{ width: MOBILE_HERO.sociaisTamanhoIcone, height: MOBILE_HERO.sociaisTamanhoIcone }}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                    </a>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Ribbon — full width (Camada superior z-20) */}
+            {/* Ribbon — full width (Camada superior z-20) com asterisco estilizado no mobile */}
             <div className="relative w-full z-20 animate-hero-ribbon" style={{ marginTop: MOBILE_HERO.faixaMargemSuperior }}>
               <img
                 src={ribbonBannerBg}
@@ -234,29 +264,32 @@ const Hero = () => {
                 className="w-full h-auto block drop-shadow-2xl"
                 loading="eager"
               />
-              <span className="absolute inset-0 flex items-center justify-center font-boldonse text-white tracking-tight lowercase select-none animate-hero-ribbon-text drop-shadow-md" style={{ fontSize: MOBILE_HERO.faixaTextoTamanho }}>
-                {t("hero.ribbon")}
+              <span
+                className="absolute inset-0 flex items-center justify-center font-boldonse text-white tracking-tight lowercase select-none animate-hero-ribbon-text drop-shadow-md"
+                style={{ fontSize: MOBILE_HERO.faixaTextoTamanho }}
+              >
+                {ribbonParts.length === 2 ? (
+                  <>
+                    <span>{ribbonParts[0]}</span>
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="inline-block w-[0.68em] h-[0.68em] mx-[0.26em] shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3.8"
+                      strokeLinecap="round"
+                      aria-hidden="true"
+                    >
+                      <line x1="12" y1="3" x2="12" y2="21" />
+                      <line x1="12" y1="3" x2="12" y2="21" transform="rotate(60 12 12)" />
+                      <line x1="12" y1="3" x2="12" y2="21" transform="rotate(120 12 12)" />
+                    </svg>
+                    <span>{ribbonParts[1]}</span>
+                  </>
+                ) : (
+                  ribbonText
+                )}
               </span>
-            </div>
-
-            {/* Social icons — centered below ribbon */}
-            <div
-              className="flex items-center justify-center gap-4 animate-hero-socials"
-              style={{ marginTop: MOBILE_HERO.sociaisEspacoTopo, marginBottom: MOBILE_HERO.sociaisEspacoEmbaixo }}
-            >
-              {socialItems.map(({ href, label, Icon }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className="rounded-full bg-[#141517] border border-white/20 flex items-center justify-center text-white/80 hover:text-white hover:border-[#00ff88] transition-all hover:scale-110 shadow-sm"
-                  style={{ width: MOBILE_HERO.sociaisTamanhoIcone, height: MOBILE_HERO.sociaisTamanhoIcone }}
-                >
-                  <Icon className="w-4 h-4" />
-                </a>
-              ))}
             </div>
           </div>
 
@@ -402,26 +435,22 @@ const Hero = () => {
 
         {/* Intro text directly below the banner */}
         <div
-          className="text-center px-4 animate-hero-socials"
-          style={{
-            marginTop: "clamp(8px, 2.5vw, 40px)",
-            marginBottom: "clamp(8px, 2.2vw, 36px)",
-          }}
+          className="text-center px-2 sm:px-4 mt-4 mb-3 sm:mt-[clamp(8px,2.5vw,40px)] sm:mb-[clamp(8px,2.2vw,36px)] animate-hero-socials"
         >
-          <p className="text-xs sm:text-base md:text-lg text-white font-normal leading-relaxed">
+          <p className="max-w-[345px] sm:max-w-none mx-auto text-[13px] sm:text-base md:text-lg text-white font-normal leading-[1.45] sm:leading-relaxed">
             <span className="text-[#00ff88] font-bold">{t("hero.intro_p1")}</span>{" "}
             {t("hero.intro_p2")}
           </p>
         </div>
 
         {/* Infinite Carousel Showcase (Full-width fluido com espaço reservado) */}
-        <div className="w-full min-h-[204px] sm:min-h-[368px] md:min-h-[488px]" style={{ marginTop: "clamp(2px, 1vw, 16px)", marginBottom: "clamp(2px, 1vw, 16px)" }}>
+        <div className="w-full min-h-[264px] sm:min-h-[368px] md:min-h-[488px] my-1 sm:my-[clamp(2px,1vw,16px)]">
           <InfiniteCarousel />
         </div>
 
         {/* Secondary description below carousel */}
-        <div className="text-center max-w-3xl mx-auto px-4" style={{ marginTop: "clamp(8px, 2vw, 24px)" }}>
-          <p className="text-xs sm:text-base md:text-lg text-white/90 leading-relaxed">
+        <div className="text-center max-w-[355px] sm:max-w-3xl mx-auto px-2 sm:px-4 mt-3 sm:mt-[clamp(8px,2vw,24px)]">
+          <p className="text-[13px] sm:text-base md:text-lg text-white/90 leading-[1.45] sm:leading-relaxed">
             <span className="text-white/80">{t("hero.outro_p1")}</span>
             <span className="text-[#00ff88] font-bold">{t("hero.outro_p2")}</span>
           </p>

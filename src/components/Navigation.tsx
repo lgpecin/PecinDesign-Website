@@ -169,9 +169,9 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 py-4 px-6 sm:px-12 transition-all duration-300">
-      <div className="max-w-7xl mx-auto flex items-center justify-between relative">
-        {/* Logo (Top Left) — Desaparece suavemente no mobile ao scrollar */}
+    <nav className="fixed top-0 left-0 right-0 z-50 pt-5 pb-3 px-4 sm:py-4 sm:px-12 transition-all duration-300">
+      <div className="max-w-7xl mx-auto flex items-center justify-center sm:justify-between relative">
+        {/* Logo — Centralizada e maior no mobile (< 640px), esquerda no sm+/desktop */}
         <button
           onClick={() => handleNavClick("hero")}
           className={`hover:opacity-80 transition-all duration-500 active:scale-95 flex items-center ${
@@ -184,7 +184,7 @@ const Navigation = () => {
             width={1429}
             height={657}
             decoding="async"
-            className="h-7 sm:h-8 w-auto drop-shadow-md"
+            className="h-[46px] sm:h-8 w-auto drop-shadow-md"
           />
         </button>
 
@@ -237,9 +237,21 @@ const Navigation = () => {
           })}
         </div>
 
-        {/* Right: Language Switcher (PT / EN) — fades out on mobile scroll */}
+        {/* Mobile (< 640px): Seletor discreto no canto superior direito para manter logo centralizada em destaque */}
+        <button
+          type="button"
+          onClick={() => setLanguage(language === "pt" ? "en" : "pt")}
+          aria-label="Alternar idioma"
+          className={`sm:hidden absolute right-0 top-1/2 -translate-y-1/2 px-2 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase bg-white/[0.06] border border-white/10 text-white/55 hover:text-white transition-all duration-500 ${
+            isScrolled ? "opacity-0 pointer-events-none scale-90" : "opacity-100 pointer-events-auto scale-100"
+          }`}
+        >
+          {language.toUpperCase()}
+        </button>
+
+        {/* Right: Language Switcher (PT / EN) — sm+ / desktop */}
         <div
-          className={`flex items-center gap-1 bg-[#141517]/80 backdrop-blur-md border border-white/20 rounded-full p-1 shadow-md transition-all duration-500 ${
+          className={`hidden sm:flex items-center gap-1 bg-[#141517]/80 backdrop-blur-md border border-white/20 rounded-full p-1 shadow-md transition-all duration-500 ${
             isScrolled ? "max-md:opacity-0 max-md:pointer-events-none max-md:scale-90" : "opacity-100 pointer-events-auto scale-100"
           }`}
         >

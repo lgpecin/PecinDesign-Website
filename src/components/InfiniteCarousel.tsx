@@ -145,7 +145,7 @@ const InfiniteCarousel = () => {
 
   return (
     <div
-      className={`relative w-screen left-1/2 -translate-x-1/2 overflow-hidden py-3 sm:py-6 my-2 sm:my-4 min-h-[204px] sm:min-h-[368px] md:min-h-[488px] transition-[opacity,transform] duration-700 ease-carousel-reveal ${
+      className={`relative w-screen left-1/2 -translate-x-1/2 overflow-hidden py-3 sm:py-6 my-2 sm:my-4 min-h-[264px] sm:min-h-[368px] md:min-h-[488px] transition-[opacity,transform] duration-700 ease-carousel-reveal ${
         isReady ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
       }`}
     >
@@ -157,7 +157,7 @@ const InfiniteCarousel = () => {
         }}
       />
       <div
-        className={`flex w-max min-h-[180px] sm:min-h-[320px] md:min-h-[440px] ${
+        className={`flex w-max min-h-[240px] sm:min-h-[320px] md:min-h-[440px] ${
           isReady ? "carousel-track" : ""
         }`}
         style={isReady ? { animationDuration: `${duration}s` } : undefined}
@@ -167,7 +167,7 @@ const InfiniteCarousel = () => {
             key={`${src}-${i}`}
             src={src}
             alt={`Portfolio ${(i % activeImages.length) + 1}`}
-            className="h-[180px] sm:h-[320px] md:h-[440px] w-auto flex-shrink-0 object-cover select-none pointer-events-none"
+            className="h-[240px] sm:h-[320px] md:h-[440px] w-auto flex-shrink-0 object-cover select-none pointer-events-none"
             loading="eager"
             decoding="async"
             draggable={false}
